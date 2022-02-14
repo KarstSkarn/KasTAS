@@ -9,7 +9,7 @@
 ### KasTAS 1.0.98 Features
 Released 14/08/2022.
 
-**KasTAS 1.0.98 Demo Video**
+**KasTAS 1.0.98 Demo Video (YouTube)** Click the image below.
 
 [![Demo Video](https://img.youtube.com/vi/LksHsI8QBbM/0.jpg)](https://www.youtube.com/watch?v=LksHsI8QBbM)
 
