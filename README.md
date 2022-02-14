@@ -1,8 +1,11 @@
-#KasTAS 1.0.98 Readme
+##KasTAS 1.0.98 Readme
 [![KasTAS Icon](https://github.com/KarstSkarn/KasTAS/blob/main/kasicon.png?raw=true "KasTAS Icon")](https://github.com/KarstSkarn/KasTAS/blob/main/kasicon.png "KasTAS Icon")
-**Readme Index**
+###Readme Index**
 
-[TOC]
+- [KasTAS 1.0.98 Features](#kastas-1098-features)
+- [Common FAQ](#common-faq)
+- [File Security Check](#file-security-check)
+
 
 ### KasTAS 1.0.98 Features
 Released 14/08/2022.
