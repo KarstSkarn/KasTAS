@@ -67,6 +67,5 @@ VirusTotal [link here.](https://www.virustotal.com/gui/file/b3bd0ba23c3205e57bc0
 VirusTotal [link here.](https://www.virustotal.com/gui/file/9cb32963df658354d47693b26be8e38cf84b0aab401eeaf2c0b558b692ed35a8 "link here.")
 
 ------------
-*By KarstSkarn (Owain Horton) (J.L.S~) 2022*
 
 [![CC Licence](https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png "CC Licence")](https://creativecommons.org/licenses/by-nc-sa/4.0/ "CC Licence")
