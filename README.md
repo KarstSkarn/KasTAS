@@ -1,4 +1,5 @@
 #KasTAS 1.0.98 Readme
+[![KasTAS Icon](https://github.com/KarstSkarn/KasTAS/blob/main/kasicon.png?raw=true "KasTAS Icon")](https://github.com/KarstSkarn/KasTAS/blob/main/kasicon.png "KasTAS Icon")
 **Readme Index**
 
 [TOC]
