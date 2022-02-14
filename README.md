@@ -9,6 +9,10 @@
 ### KasTAS 1.0.98 Features
 Released 14/08/2022.
 
+**KasTAS 1.0.98 Demo Video**
+
+[![Demo Video](https://img.youtube.com/vi/LksHsI8QBbM/0.jpg)](https://www.youtube.com/watch?v=LksHsI8QBbM)
+
 - Full support for a total of 21 Virtual Keys / Buttons.
 - Stable use of *.kas* Script files fully tested.
 - Includes *.pdf* file with examples and full in detail explaination of the KAS Script.
