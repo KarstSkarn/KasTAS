@@ -24,21 +24,26 @@ Released 14/08/2022.
 
 ### Common FAQ
 - **Is the software specific to a emulator or game?**
+
 No. What KasTAS really does is emulate that you are pushing keys in your keyboard in the choosen pattern. So **it will work in any active window** or in any emulator if you set up the same keys that you defined in your KasTAS program.
 **Hint:** It will even work if you set up a pattern of keys like *"H", "E", "L", "O"* to write *"HELLO"* in your notepad.
 
 - **Can the program auto-write a Kas Script file meanwhile I manually play a game?**
+
 No. **The program has not any way to detect your keyboard strokes**. The use of the keyboard is single-direction meaning that it can emulate keystrokes but there is no way to read keystrokes.
 
 - **Can I see the source?**
+
 Not publicly but feel free to request me the source or discuss it using Discord. (Owain#3593)
 
 - **Does it needs to be installed?**
+
 No. The executable is fully standalone. Check the question below for more details.
 
 - **Why the executable is so big?**
+
 I know that the executable turned out bigger than I would like. This is caused by two factors.
-First that in this kind of not really important programs I preffer stand alone versus installable. Thats because in case the user realizes that the program is not what he was looking for, the user can easily remove the whole program by just deleting it without any kind of issue.
+First that in this kind of "not really important" programs I preffer standalone versus installable. Thats because in case the user realizes that the program is not what he was looking for, the user can easily remove the whole program by just deleting it without any kind of issue.
 Also the other issue is that to do the virtual keystrokes must use Microsoft Windows Forms library despite is a console executable. And Microsoft Windows Forms library is one of the few libraries that cannot be trimmed. So sadly, there is a lot of unused stuff merged in the final executable.
 
 ### File Security Check
