@@ -7,7 +7,6 @@
 - [File Security Check](#file-security-check)
 
 ### KasTAS 1.0.98 Features
-Released 14/08/2022.
 
 **KasTAS 1.0.98 Demo Video (YouTube)** Click the image below.
 
