@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0-windows10.0.22000.0</TargetFramework>
+    <RootNamespace>KasTAS</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>True</UseWindowsForms>
+    <StartupObject></StartupObject>
+    <DebugType>full</DebugType>
+    <PackageId>KasTAS</PackageId>
+    <Version>1.0.98</Version>
+    <Authors>Owain#3593</Authors>
+    <Product>KasTAS</Product>
+    <Description>Tool for execute user defined keyboard macro scripts.</Description>
+    <SignAssembly>False</SignAssembly>
+    <Copyright>CC BY-NC-SA International 4.0</Copyright>
+    <AssemblyVersion>1.0.98.1</AssemblyVersion>
+    <FileVersion>1.0.98.1</FileVersion>
+    <PlatformTarget>x86</PlatformTarget>
+    <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
+    <AssemblyName>KasTAS 1.0.98</AssemblyName>
+    <ApplicationIcon>ALTICON.ICO</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="ALTICON.ICO" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+</Project>

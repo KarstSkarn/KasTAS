@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "ZE7oXLJJxKNBL+gpRIIzIi+8fu4CIKylYWBPo+qS7w8jynrRd0YS7tdf+6ChAGWOxo4y9HNsUQ9FaGTYgKka/w==",
+  "success": true,
+  "projectFilePath": "E:\\VStudio Repos\\KasTAS PureC\\KasTAS 1.0.XX.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Falken\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x64\\6.0.1\\microsoft.netcore.app.runtime.win-x64.6.0.1.nupkg.sha512",
+    "C:\\Users\\Falken\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x64\\6.0.1\\microsoft.windowsdesktop.app.runtime.win-x64.6.0.1.nupkg.sha512",
+    "C:\\Users\\Falken\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x64\\6.0.1\\microsoft.aspnetcore.app.runtime.win-x64.6.0.1.nupkg.sha512",
+    "C:\\Users\\Falken\\.nuget\\packages\\microsoft.windows.sdk.net.ref\\10.0.22000.22\\microsoft.windows.sdk.net.ref.10.0.22000.22.nupkg.sha512"
+  ],
+  "logs": []
+}

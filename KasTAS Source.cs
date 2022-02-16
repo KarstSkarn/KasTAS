@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -66,7 +66,7 @@ namespace KasTAS
 
         public static int cfgTotalLines = 12;
         public static int cfgKeyTotalLines = 24;
-        public static string lineSixtyNine = "GOGINGA GOGINGA GOGOGIGOAGOGAGUGGEGA GUNGA GINGA";
+        public static string lineSixtyNine = "GOGINGA GOGINGA GOGOGIGOAGOGAGUGGEGA GUNGA GINGA"; // ?
         public static int cfgValuePos = 18;
         public static string cfgFile = "kascfg.ini";
         public static string cfgKeysFile = "keydata.ini";
@@ -1104,6 +1104,13 @@ namespace KasTAS
                 }
             }
         }
+        public static void FirstInitHalt()
+        {
+            if (Global.flagFirstInit == "true")
+            {
+                // Here it used to be a disclaimer message in older versions.
+            }
+        }
         public static void WriteToCfg(int line, string value)
         {
             char padChar = '0';
@@ -1144,6 +1151,7 @@ namespace KasTAS
         }
         public static void DebugHalt()
         {
+            // Used only for debug purposes.
             WRT.WRLine(" ", "White", "Black");
             WRT.WRLine(" [Debug] Execution Halted.", "Yellow", "Black");
             System.Console.ReadLine();
@@ -1170,7 +1178,7 @@ namespace KasTAS
         }
         public static void AltInput(string altIn)
         {
-            if ((altIn == "$Credit") || (altIn == "$credit"))
+            if (altIn.ToLower() == "$credit")
             {
                 GUI.DrawClearBuffer();
                 Console.SetCursorPosition(0, Global.windowH - 3);
@@ -1311,19 +1319,19 @@ namespace KasTAS
             if (Global.SysConfig == true)
             {
                 Global.tmpUserInput = EXF.StaticPrompt();
-                if ((Global.tmpUserInput == "1") || (Global.tmpUserInput == "G") || (Global.tmpUserInput == "g"))
+                if ((Global.tmpUserInput == "1") || (Global.tmpUserInput.ToLower() == "g"))
                 {
                     Global.tmpWritePad = "00 SYS TARGET   = GB";
                     EXF.WriteToKeyCfg(0, Global.tmpWritePad);
                     return;
                 }
-                if ((Global.tmpUserInput == "2") || (Global.tmpUserInput == "S") || (Global.tmpUserInput == "s"))
+                if ((Global.tmpUserInput == "2") || (Global.tmpUserInput.ToLower() == "s"))
                 {
                     Global.tmpWritePad = "00 SYS TARGET   = SNES";
                     EXF.WriteToKeyCfg(0, Global.tmpWritePad);
                     return;
                 }
-                if ((Global.tmpUserInput == "3") || (Global.tmpUserInput == "T") || (Global.tmpUserInput == "t"))
+                if ((Global.tmpUserInput == "3") || (Global.tmpUserInput.ToLower() == "t"))
                 {
                     if (Global.flagExtMode == "true")
                     {
@@ -1338,7 +1346,7 @@ namespace KasTAS
                         return;
                     }
                 }
-                    if ((Global.tmpUserInput == "4") || (Global.tmpUserInput == "E") || (Global.tmpUserInput == "e"))
+                    if ((Global.tmpUserInput == "4") || (Global.tmpUserInput.ToLower() == "e"))
                 {
                     Global.SysConfig = false;
                     Global.tmpUserInput = "NULL";
@@ -1352,7 +1360,7 @@ namespace KasTAS
             while (Global.configKeysMode)
             {
                 Global.tmpUserInput = EXF.StaticPrompt();
-                if ((Global.tmpUserInput == "0") || (Global.tmpUserInput == "U") || (Global.tmpUserInput == "u"))
+                if ((Global.tmpUserInput == "0") || (Global.tmpUserInput.ToLower() == "u"))
                 {
                     GUI.DrawClearBuffer();
                     Console.SetCursorPosition(0, Global.windowH - 3);
@@ -1371,7 +1379,7 @@ namespace KasTAS
                     GUI.DrawLowerBarSpacer();
                     WRT.WRLine(" Virtual Key Released!", "Green", "Black");
                 }
-                else if ((Global.tmpUserInput == "1") || (Global.tmpUserInput == "D") || (Global.tmpUserInput == "d"))
+                else if ((Global.tmpUserInput == "1") || (Global.tmpUserInput.ToLower() == "d"))
                 {
                     GUI.DrawClearBuffer();
                     Console.SetCursorPosition(0, Global.windowH - 3);
@@ -1390,7 +1398,7 @@ namespace KasTAS
                     GUI.DrawLowerBarSpacer();
                     WRT.WRLine(" Virtual Key Released!", "Green", "Black");
                 }
-                else if ((Global.tmpUserInput == "2") || (Global.tmpUserInput == "L") || (Global.tmpUserInput == "l"))
+                else if ((Global.tmpUserInput == "2") || (Global.tmpUserInput.ToLower() == "l"))
                 {
                     GUI.DrawClearBuffer();
                     Console.SetCursorPosition(0, Global.windowH - 3);
@@ -1409,7 +1417,7 @@ namespace KasTAS
                     GUI.DrawLowerBarSpacer();
                     WRT.WRLine(" Virtual Key Released!", "Green", "Black");
                 }
-                else if ((Global.tmpUserInput == "3") || (Global.tmpUserInput == "R") || (Global.tmpUserInput == "r"))
+                else if ((Global.tmpUserInput == "3") || (Global.tmpUserInput.ToLower() == "r"))
                 {
                     GUI.DrawClearBuffer();
                     Console.SetCursorPosition(0, Global.windowH - 3);
@@ -1428,7 +1436,7 @@ namespace KasTAS
                     GUI.DrawLowerBarSpacer();
                     WRT.WRLine(" Virtual Key Released!", "Green", "Black");
                 }
-                else if ((Global.tmpUserInput == "4") || (Global.tmpUserInput == "ST") || (Global.tmpUserInput == "st") || (Global.tmpUserInput == "sT") || (Global.tmpUserInput == "St"))
+                else if ((Global.tmpUserInput == "4") || (Global.tmpUserInput.ToLower() == "st"))
                 {
                     GUI.DrawClearBuffer();
                     Console.SetCursorPosition(0, Global.windowH - 3);
@@ -1447,7 +1455,7 @@ namespace KasTAS
                     GUI.DrawLowerBarSpacer();
                     WRT.WRLine(" Virtual Key Released!", "Green", "Black");
                 }
-                else if ((Global.tmpUserInput == "5") || (Global.tmpUserInput == "SE") || (Global.tmpUserInput == "se") || (Global.tmpUserInput == "Se") || (Global.tmpUserInput == "sE"))
+                else if ((Global.tmpUserInput == "5") || (Global.tmpUserInput.ToLower() == "se"))
                 {
                     GUI.DrawClearBuffer();
                     Console.SetCursorPosition(0, Global.windowH - 3);
@@ -1466,7 +1474,7 @@ namespace KasTAS
                     GUI.DrawLowerBarSpacer();
                     WRT.WRLine(" Virtual Key Released!", "Green", "Black");
                 }
-                else if ((Global.tmpUserInput == "6") || (Global.tmpUserInput == "A") || (Global.tmpUserInput == "a"))
+                else if ((Global.tmpUserInput == "6") || (Global.tmpUserInput.ToLower() == "a"))
                 {
                     GUI.DrawClearBuffer();
                     Console.SetCursorPosition(0, Global.windowH - 3);
@@ -1485,7 +1493,7 @@ namespace KasTAS
                     GUI.DrawLowerBarSpacer();
                     WRT.WRLine(" Virtual Key Released!", "Green", "Black");
                 }
-                else if ((Global.tmpUserInput == "7") || (Global.tmpUserInput == "B") || (Global.tmpUserInput == "b"))
+                else if ((Global.tmpUserInput == "7") || (Global.tmpUserInput.ToLower() == "b"))
                 {
                     GUI.DrawClearBuffer();
                     Console.SetCursorPosition(0, Global.windowH - 3);
@@ -1504,7 +1512,7 @@ namespace KasTAS
                     GUI.DrawLowerBarSpacer();
                     WRT.WRLine(" Virtual Key Released!", "Green", "Black");
                 }
-                else if ((Global.tmpUserInput == "8") || (Global.tmpUserInput == "X") || (Global.tmpUserInput == "x"))
+                else if ((Global.tmpUserInput == "8") || (Global.tmpUserInput.ToLower() == "x"))
                 {
                     GUI.DrawClearBuffer();
                     Console.SetCursorPosition(0, Global.windowH - 3);
@@ -1523,7 +1531,7 @@ namespace KasTAS
                     GUI.DrawLowerBarSpacer();
                     WRT.WRLine(" Virtual Key Released!", "Green", "Black");
                 }
-                else if ((Global.tmpUserInput == "9") || (Global.tmpUserInput == "Y") || (Global.tmpUserInput == "y"))
+                else if ((Global.tmpUserInput == "9") || (Global.tmpUserInput.ToLower() == "y"))
                 {
                     GUI.DrawClearBuffer();
                     Console.SetCursorPosition(0, Global.windowH - 3);
@@ -1542,7 +1550,7 @@ namespace KasTAS
                     GUI.DrawLowerBarSpacer();
                     WRT.WRLine(" Virtual Key Released!", "Green", "Black");
                 }
-                else if ((Global.tmpUserInput == "11") || (Global.tmpUserInput == "BL") || (Global.tmpUserInput == "bl") || (Global.tmpUserInput == "Bl") || (Global.tmpUserInput == "bL"))
+                else if ((Global.tmpUserInput == "11") || (Global.tmpUserInput.ToLower() == "bl"))
                 {
                     GUI.DrawClearBuffer();
                     Console.SetCursorPosition(0, Global.windowH - 3);
@@ -1561,7 +1569,7 @@ namespace KasTAS
                     GUI.DrawLowerBarSpacer();
                     WRT.WRLine(" Virtual Key Released!", "Green", "Black");
                 }
-                else if ((Global.tmpUserInput == "12") || (Global.tmpUserInput == "BR") || (Global.tmpUserInput == "br") || (Global.tmpUserInput == "Br") || (Global.tmpUserInput == "bR"))
+                else if ((Global.tmpUserInput == "12") || (Global.tmpUserInput.ToLower() == "br"))
                 {
                     GUI.DrawClearBuffer();
                     Console.SetCursorPosition(0, Global.windowH - 3);
@@ -1580,7 +1588,7 @@ namespace KasTAS
                     GUI.DrawLowerBarSpacer();
                     WRT.WRLine(" Virtual Key Released!", "Green", "Black");
                 }
-                else if ((Global.tmpUserInput == "13") || (Global.tmpUserInput == "E0") || (Global.tmpUserInput == "e0"))
+                else if ((Global.tmpUserInput == "13") || (Global.tmpUserInput.ToLower() == "e0"))
                 {
                     GUI.DrawClearBuffer();
                     Console.SetCursorPosition(0, Global.windowH - 3);
@@ -1599,7 +1607,7 @@ namespace KasTAS
                     GUI.DrawLowerBarSpacer();
                     WRT.WRLine(" Virtual Key Released!", "Green", "Black");
                 }
-                else if ((Global.tmpUserInput == "14") || (Global.tmpUserInput == "E1") || (Global.tmpUserInput == "e1"))
+                else if ((Global.tmpUserInput == "14") || (Global.tmpUserInput.ToLower() == "e1"))
                 {
                     GUI.DrawClearBuffer();
                     Console.SetCursorPosition(0, Global.windowH - 3);
@@ -1618,7 +1626,7 @@ namespace KasTAS
                     GUI.DrawLowerBarSpacer();
                     WRT.WRLine(" Virtual Key Released!", "Green", "Black");
                 }
-                else if ((Global.tmpUserInput == "15") || (Global.tmpUserInput == "E2") || (Global.tmpUserInput == "e2"))
+                else if ((Global.tmpUserInput == "15") || (Global.tmpUserInput.ToLower() == "e2"))
                 {
                     GUI.DrawClearBuffer();
                     Console.SetCursorPosition(0, Global.windowH - 3);
@@ -1637,7 +1645,7 @@ namespace KasTAS
                     GUI.DrawLowerBarSpacer();
                     WRT.WRLine(" Virtual Key Released!", "Green", "Black");
                 }
-                else if ((Global.tmpUserInput == "16") || (Global.tmpUserInput == "E3") || (Global.tmpUserInput == "e3"))
+                else if ((Global.tmpUserInput == "16") || (Global.tmpUserInput.ToLower() == "e3"))
                 {
                     GUI.DrawClearBuffer();
                     Console.SetCursorPosition(0, Global.windowH - 3);
@@ -1656,7 +1664,7 @@ namespace KasTAS
                     GUI.DrawLowerBarSpacer();
                     WRT.WRLine(" Virtual Key Released!", "Green", "Black");
                 }
-                else if ((Global.tmpUserInput == "17") || (Global.tmpUserInput == "E4") || (Global.tmpUserInput == "e4"))
+                else if ((Global.tmpUserInput == "17") || (Global.tmpUserInput.ToLower() == "e4"))
                 {
                     GUI.DrawClearBuffer();
                     Console.SetCursorPosition(0, Global.windowH - 3);
@@ -1675,7 +1683,7 @@ namespace KasTAS
                     GUI.DrawLowerBarSpacer();
                     WRT.WRLine(" Virtual Key Released!", "Green", "Black");
                 }
-                else if ((Global.tmpUserInput == "18") || (Global.tmpUserInput == "E5") || (Global.tmpUserInput == "e5"))
+                else if ((Global.tmpUserInput == "18") || (Global.tmpUserInput.ToLower() == "e5"))
                 {
                     GUI.DrawClearBuffer();
                     Console.SetCursorPosition(0, Global.windowH - 3);
@@ -1694,7 +1702,7 @@ namespace KasTAS
                     GUI.DrawLowerBarSpacer();
                     WRT.WRLine(" Virtual Key Released!", "Green", "Black");
                 }
-                else if ((Global.tmpUserInput == "19") || (Global.tmpUserInput == "E6") || (Global.tmpUserInput == "e6"))
+                else if ((Global.tmpUserInput == "19") || (Global.tmpUserInput.ToLower() == "e6"))
                 {
                     GUI.DrawClearBuffer();
                     Console.SetCursorPosition(0, Global.windowH - 3);
@@ -1713,7 +1721,7 @@ namespace KasTAS
                     GUI.DrawLowerBarSpacer();
                     WRT.WRLine(" Virtual Key Released!", "Green", "Black");
                 }
-                else if ((Global.tmpUserInput == "20") || (Global.tmpUserInput == "E7") || (Global.tmpUserInput == "e7"))
+                else if ((Global.tmpUserInput == "20") || (Global.tmpUserInput.ToLower() == "e7"))
                 {
                     GUI.DrawClearBuffer();
                     Console.SetCursorPosition(0, Global.windowH - 3);
@@ -1732,7 +1740,7 @@ namespace KasTAS
                     GUI.DrawLowerBarSpacer();
                     WRT.WRLine(" Virtual Key Released!", "Green", "Black");
                 }
-                else if ((Global.tmpUserInput == "21") || (Global.tmpUserInput == "E8") || (Global.tmpUserInput == "e8"))
+                else if ((Global.tmpUserInput == "21") || (Global.tmpUserInput.ToLower() == "e8"))
                 {
                     GUI.DrawClearBuffer();
                     Console.SetCursorPosition(0, Global.windowH - 3);
@@ -1751,7 +1759,7 @@ namespace KasTAS
                     GUI.DrawLowerBarSpacer();
                     WRT.WRLine(" Virtual Key Released!", "Green", "Black");
                 }
-                else if ((Global.tmpUserInput == "22") || (Global.tmpUserInput == "E9") || (Global.tmpUserInput == "e9"))
+                else if ((Global.tmpUserInput == "22") || (Global.tmpUserInput.ToLower() == "e9"))
                 {
                     GUI.DrawClearBuffer();
                     Console.SetCursorPosition(0, Global.windowH - 3);
@@ -1770,7 +1778,7 @@ namespace KasTAS
                     GUI.DrawLowerBarSpacer();
                     WRT.WRLine(" Virtual Key Released!", "Green", "Black");
                 }
-                else if ((Global.tmpUserInput == "10") || (Global.tmpUserInput == "E") || (Global.tmpUserInput == "e"))
+                else if ((Global.tmpUserInput == "10") || (Global.tmpUserInput.ToLower() == "e"))
                 {
                     GUI.DrawClearBuffer();
                     Console.SetCursorPosition(0, Global.windowH - 3);
@@ -1780,8 +1788,10 @@ namespace KasTAS
                     Global.tmpUserInput = "NULL";
                     return;
                 }
-                else if ((Global.tmpUserInput == "69") || (Global.tmpUserInput == "BGB") || (Global.tmpUserInput == "bgb") || (Global.tmpUserInput == "Bgb") || (Global.tmpUserInput == "bGb"))
+                else if ((Global.tmpUserInput == "69") || (Global.tmpUserInput.ToLower() == "bgb"))
                 {
+                    // This presses the virtual keys in the same order than the BGB Emulator allows them to be configured.
+                    // So it solves a little time.
                     GUI.DrawClearBuffer();
                     Console.SetCursorPosition(0, Global.windowH - 3);
                     GUI.DrawLowerBarSpacer();
@@ -1925,7 +1935,7 @@ namespace KasTAS
             while (Global.testKeysMode)
             {
                 Global.tmpUserInput = EXF.StaticPrompt();
-                if ((Global.tmpUserInput == "1") || (Global.tmpUserInput == "I"))
+                if ((Global.tmpUserInput == "1") || (Global.tmpUserInput.ToLower() == "i"))
                 {
                     GUI.DrawClearBuffer();
                     Console.SetCursorPosition(0, Global.windowH - 3);
@@ -1974,7 +1984,7 @@ namespace KasTAS
                     GUI.DrawLowerBarSpacer();
                     WRT.WRLine(" Incremental Test did end!", "Green", "Black");
                 }
-                else if ((Global.tmpUserInput == "2") || (Global.tmpUserInput == "C"))
+                else if ((Global.tmpUserInput == "2") || (Global.tmpUserInput.ToLower() == "c"))
                 {
                     GUI.DrawClearBuffer();
                     Console.SetCursorPosition(0, Global.windowH - 3);
@@ -2018,7 +2028,7 @@ namespace KasTAS
                     GUI.DrawLowerBarSpacer();
                     WRT.WRLine(" Continous Test did end!", "Green", "Black");
                 }
-                else if ((Global.tmpUserInput == "3") || (Global.tmpUserInput == "F"))
+                else if ((Global.tmpUserInput == "3") || (Global.tmpUserInput.ToLower() == "f"))
                 {
                     GUI.DrawClearBuffer();
                     Console.SetCursorPosition(0, Global.windowH - 3);
@@ -2062,7 +2072,7 @@ namespace KasTAS
                     GUI.DrawLowerBarSpacer();
                     WRT.WRLine(" Frame Test did end!", "White", "Black");
                 }
-                else if ((Global.tmpUserInput == "4") || (Global.tmpUserInput == "H"))
+                else if ((Global.tmpUserInput == "4") || (Global.tmpUserInput.ToLower() == "h"))
                 {
                     GUI.DrawClearBuffer();
                     Console.SetCursorPosition(0, Global.windowH - 3);
@@ -2114,7 +2124,7 @@ namespace KasTAS
                     GUI.DrawLowerBarSpacer();
                     WRT.WRLine(" TI.Hold(Test did end!", "Green", "Black");
                 }
-                else if ((Global.tmpUserInput == "5") || (Global.tmpUserInput == "E") || (Global.tmpUserInput == "e"))
+                else if ((Global.tmpUserInput == "5") || (Global.tmpUserInput.ToLower() == "e"))
                 {
                     WRT.WRLine(" Exiting Test Mode", "DarkGray", "Black");
                     Global.testKeysMode = false;
@@ -2141,7 +2151,7 @@ namespace KasTAS
                 {
                     EXF.ReadKAS();
                 }
-                if ((Global.tmpUserInput == "1") || (Global.tmpUserInput == "L") || (Global.tmpUserInput == "l"))
+                if ((Global.tmpUserInput == "1") || (Global.tmpUserInput.ToLower() == "l"))
                 {
                     Global.tmpUserInput = EXF.FileStaticPrompt();
                     Global.tmpFileExists = File.Exists(Global.scriptsDirectory + Global.tmpUserInput);
@@ -2187,7 +2197,7 @@ namespace KasTAS
                             string tmpFileData = File.ReadLines(Global.scriptsDirectory + Global.tmpUserInput).Skip(skip).Take(take).First();
                             if (tmpFileData.Length >= 0)
                             {
-                                // Parse first XX of Instruction.
+                                // Parse first XX of OpCode.
                                 string tmpSubString = tmpFileData.Substring(0, 2);
                                 Global.tmpKindOfOP = "NULL";
                                 Global.PV_RESW = 9;
@@ -2211,7 +2221,7 @@ namespace KasTAS
                                 if (tmpSubString == "DM") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "TI"; }
                                 if (Global.scriptCodeValid == true)
                                 {
-                                    // Draw on screen the first half of the Instruction.
+                                    // Draw on screen the first half of the OpCode.
                                     if (Global.tmpKindOfOP == "KS") { WRT.WR(tmpSubString, "Yellow", "Black"); }
                                     if (Global.tmpKindOfOP == "SP") { WRT.WR(tmpSubString, "Yellow", "Black"); }
                                     if (Global.tmpKindOfOP == "CO") { WRT.WR(tmpSubString, "Yellow", "Black"); }
@@ -2223,7 +2233,7 @@ namespace KasTAS
                                 }
                                 else
                                 {
-                                    // Error: Not a valid Instruction.
+                                    // Error: Not a valid OpCode.
                                     Global.tmpReadErrorFound++;
                                     int tmpLateSubstring = tmpFileData.Length - 2;
                                     tmpSubString = tmpFileData.Substring(2, tmpLateSubstring);
@@ -2231,26 +2241,26 @@ namespace KasTAS
                                 }
                                 if (Global.tmpKindOfOP == "KS")
                                 {
-                                    // Instruction is a Key String.
+                                    // OpCode is a Key String.
                                     int tmpLateSubstring = tmpFileData.Length - 2;
                                     tmpSubString = tmpFileData.Substring(2, tmpLateSubstring);
                                     WRT.WR(tmpSubString, "DarkGreen", "Black");
                                 }
                                 if (Global.tmpKindOfOP == "EN")
                                 {
-                                    // Instruction is an end Instruction.
+                                    // OpCode is an end OpCode.
                                     int tmpLateSubstring = tmpFileData.Length - 2;
                                     tmpSubString = tmpFileData.Substring(2, tmpLateSubstring);
                                     WRT.WR(tmpSubString, "DarkMagenta", "Black");
                                 }
                                 if (Global.tmpKindOfOP == "RE")
                                 {
-                                    // Instruction is a Script Commentary/Rem.
+                                    // OpCode is a Script Commentary/Rem.
                                     int tmpLateSubstring = tmpFileData.Length - 2;
                                     tmpSubString = tmpFileData.Substring(2, tmpLateSubstring);
                                     WRT.WR(tmpSubString, "DarkMagenta", "Black");
                                 }
-                                // Parse next 2 XX YY of the Instruction
+                                // Parse next 2 XX YY of the OpCode
                                 if ((tmpFileData.Length >= 5) && (Global.tmpKindOfOP != "RE"))
                                 {
                                     tmpSubString = tmpFileData.Substring(2, 1);
@@ -2265,7 +2275,7 @@ namespace KasTAS
                                     }
                                     if ((Global.tmpKindOfOP == "CO") || (Global.tmpKindOfOP == "SP"))
                                     {
-                                        // Instruction is a button control Instruction.
+                                        // OpCode is a button control OpCode.
                                         Global.scriptCodeValid = false;
                                         tmpSubString = tmpFileData.Substring(3, 2);
                                         if (tmpSubString == "AA") { Global.scriptCodeValid = true; }
@@ -2309,14 +2319,14 @@ namespace KasTAS
                                         {
                                             if (Global.tmpKindOfOP == "CO")
                                             {
-                                                // Error: A CO type Instruction shouldn't have more characters.
+                                                // Error: A CO type OpCode shouldn't have more characters.
                                                 int tmpLateSubstring = tmpFileData.Length - 5;
                                                 tmpSubString = tmpFileData.Substring(5, tmpLateSubstring);
                                                 WRT.WR(tmpSubString, "Red", "Black");
                                             }
                                             if (Global.tmpKindOfOP == "SP")
                                             {
-                                                // Get SoftPush Instruction time value.
+                                                // Get SoftPush OpCode time value.
                                                 int tmpLateSubstring = tmpFileData.Length - 5;
                                                 tmpSubString = tmpFileData.Substring(5, tmpLateSubstring);
                                                 WRT.WR(tmpSubString, "Cyan", "Black");
@@ -2325,35 +2335,35 @@ namespace KasTAS
                                     }
                                     else if (Global.tmpKindOfOP == "JU")
                                     {
-                                        // Instruction is a Jump Instruction.
+                                        // OpCode is a Jump OpCode.
                                         int tmpLateSubstring = tmpFileData.Length - 3;
                                         tmpSubString = tmpFileData.Substring(3, tmpLateSubstring);
                                         WRT.WR(tmpSubString, "White", "Black");
                                     }
                                     else if (Global.tmpKindOfOP == "TI")
                                     {
-                                        // Instruction is a Time/Wait Instruction.
+                                        // OpCode is a Time/Wait OpCode.
                                         int tmpLateSubstring = tmpFileData.Length - 3;
                                         tmpSubString = tmpFileData.Substring(3, tmpLateSubstring);
                                         WRT.WR(tmpSubString, "Cyan", "Black");
                                     }
                                     else if (Global.tmpKindOfOP == "JT")
                                     {
-                                        // Instruction is a Jump X Times Instruction.
+                                        // OpCode is a Jump X Times OpCode.
                                         // Get how many times it will repeat (Max = 99).
                                         tmpSubString = tmpFileData.Substring(3, 2);
                                         WRT.WR(tmpSubString, "DarkCyan", "Black");
                                         tmpSubString = tmpFileData.Substring(5, 1);
                                         if (tmpSubString == " ")
                                         {
-                                            // Is a valid JT Instruction. Draw line on screen.
+                                            // Is a valid JT OpCode. Draw line on screen.
                                             int tmpLateSubstring = tmpFileData.Length - 5;
                                             tmpSubString = tmpFileData.Substring(5, tmpLateSubstring);
                                             WRT.WR(tmpSubString, "Cyan", "Black");
                                         }
                                         else
                                         {
-                                            // Error: Format error on JT Instruction.
+                                            // Error: Format error on JT OpCode.
                                             Global.tmpReadErrorFound++;
                                             int tmpLateSubstring = tmpFileData.Length - 5;
                                             tmpSubString = tmpFileData.Substring(5, tmpLateSubstring);
@@ -2363,10 +2373,10 @@ namespace KasTAS
                                 }
                                 else if ((tmpFileData.Length >= 3) && (tmpFileData.Length <= 5) && (Global.tmpKindOfOP != "RE"))
                                 {
-                                    // Special case for small value Instructions.
+                                    // Special case for small value OpCodes.
                                     if (Global.tmpKindOfOP == "JU")
                                     {
-                                        // Instruction is a Jump Instruction.
+                                        // OpCode is a Jump OpCode.
                                         int tmpLateSubstring = tmpFileData.Length - 3;
                                         tmpSubString = tmpFileData.Substring(3, tmpLateSubstring);
                                         WRT.WR(" ", "White", "Black");
@@ -2374,7 +2384,7 @@ namespace KasTAS
                                     }
                                     else if (Global.tmpKindOfOP == "TI")
                                     {
-                                        // Instruction is a Time/Wait Instruction.
+                                        // OpCode is a Time/Wait OpCode.
                                         int tmpLateSubstring = tmpFileData.Length - 3;
                                         tmpSubString = tmpFileData.Substring(3, tmpLateSubstring);
                                         WRT.WR(" ", "White", "Black");
@@ -2382,7 +2392,7 @@ namespace KasTAS
                                     }
                                     else if (Global.tmpKindOfOP == "JT")
                                     {
-                                        // Instruction is a Jump X Times Instruction.
+                                        // OpCode is a Jump X Times OpCode.
                                         // Get how many times it will repeat (Max = 99).
                                         tmpSubString = tmpFileData.Substring(3, 2);
                                         WRT.WR(" ", "White", "Black");
@@ -2390,7 +2400,7 @@ namespace KasTAS
                                         tmpSubString = tmpFileData.Substring(5, 1);
                                         if (tmpSubString == " ")
                                         {
-                                            // Is a valid JT Instruction. Draw line on screen.
+                                            // Is a valid JT OpCode. Draw line on screen.
                                             WRT.WR(" ", "White", "Black");
                                             int tmpLateSubstring = tmpFileData.Length - 6;
                                             tmpSubString = tmpFileData.Substring(6, tmpLateSubstring);
@@ -2398,7 +2408,7 @@ namespace KasTAS
                                         }
                                         else
                                         {
-                                            // Error: Format error on JT Instruction.
+                                            // Error: Format error on JT OpCode.
                                             Global.tmpReadErrorFound++;
                                             WRT.WR(" ", "White", "Black");
                                             int tmpLateSubstring = tmpFileData.Length - 6;
@@ -2449,7 +2459,7 @@ namespace KasTAS
                     Global.restartArea = true;
                     GC.Collect();
                 }
-                if ((Global.tmpUserInput == "2") || (Global.tmpUserInput == "E") || (Global.tmpUserInput == "e"))
+                if ((Global.tmpUserInput == "2") || (Global.tmpUserInput.ToLower() == "e"))
                 {
                     Global.KSOAutoScriptReadMode = false;
                     Global.tmpUserInput = "NULL";
@@ -2476,7 +2486,7 @@ namespace KasTAS
                 {
                     EXF.ExecuteKAS();
                 }
-                if ((Global.tmpUserInput == "1") || (Global.tmpUserInput == "L") || (Global.tmpUserInput == "l"))
+                if ((Global.tmpUserInput == "1") || (Global.tmpUserInput.ToLower() == "l"))
                 {
                     if (Global.flagLoadLast == false)
                     {
@@ -2560,7 +2570,7 @@ namespace KasTAS
                                 {
                                     Global.tmpFileData = Global.tmpFileData.Substring(0, 30);
                                 }
-                                // Parse first XX of Instruction.
+                                // Parse first XX of OpCode.
                                 Global.tmpSubstring = Global.tmpFileData.Substring(0, 2);
                                 Global.tmpKindOfOP = "NULL";
                                 Global.PV_RESW = 9;
@@ -2585,7 +2595,7 @@ namespace KasTAS
                                 if (Global.tmpSubstring == "DM") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "TI"; }
                                 if (Global.scriptCodeValid == true)
                                 {
-                                    // Draw on screen the first half of the Instruction.
+                                    // Draw on screen the first half of the OpCode.
                                     if (Global.tmpKindOfOP == "SP") { WRT.WR(Global.tmpSubstring, "Yellow", "Black"); }
                                     if (Global.tmpKindOfOP == "CO") { WRT.WR(Global.tmpSubstring, "Yellow", "Black"); }
                                     if (Global.tmpKindOfOP == "KS") { WRT.WR(Global.tmpSubstring, "Yellow", "Black"); }
@@ -2599,15 +2609,15 @@ namespace KasTAS
                                 }
                                 else
                                 {
-                                    // Error: Not a valid Instruction.
+                                    // Error: Not a valid OpCode.
                                     int tmpLateSubstring = Global.tmpFileData.Length - 2;
                                     Global.tmpSubstring = Global.tmpFileData.Substring(2, tmpLateSubstring);
                                     WRT.WR(Global.tmpSubstring, "Red", "Black");
                                 }
-                                // Small Instructions Special Identification Area
+                                // Small OPCodes Special Identification Area
                                 if (Global.tmpKindOfOP == "KS")
                                 {
-                                    // Instruction is a Special Key String.
+                                    // OpCode is a Special Key String.
                                     int tmpLateSubstring = Global.tmpFileData.Length - 2;
                                     Global.tmpSubstring = Global.tmpFileData.Substring(2, tmpLateSubstring);
                                     Global.tmpOPValueCache = Global.tmpSubstring;
@@ -2615,26 +2625,26 @@ namespace KasTAS
                                 }
                                 if (Global.tmpKindOfOP == "RE")
                                 {
-                                    // Instruction is a Script Commentary/Rem.
+                                    // OpCode is a Script Commentary/Rem.
                                     int tmpLateSubstring = Global.tmpFileData.Length - 2;
                                     Global.tmpSubstring = Global.tmpFileData.Substring(2, tmpLateSubstring);
                                     WRT.WR(Global.tmpSubstring, "DarkMagenta", "Black");
                                 }
                                 if (Global.tmpKindOfOP == "EN")
                                 {
-                                    // Instruction is an end Instruction.
+                                    // OpCode is an end OpCode.
                                     int tmpLateSubstring = Global.tmpFileData.Length - 2;
                                     Global.tmpSubstring = Global.tmpFileData.Substring(2, tmpLateSubstring);
                                     WRT.WR(Global.tmpSubstring, "DarkMagenta", "Black");
                                 }
-                                // Small Instructions Special Drawing
+                                // Small OpCodes Special Drawing
                                 if (Global.tmpFileData.Length <= 3)
                                 {
                                     int tmpLateSubstring = Global.tmpFileData.Length - 2;
                                     Global.tmpSubstring = Global.tmpFileData.Substring(2, tmpLateSubstring);
                                     WRT.WR(Global.tmpSubstring, "Red", "Black");
                                 }
-                                // Parse next 2 XX YY of the Instruction
+                                // Parse next 2 XX YY of the OpCode
                                 if ((Global.tmpFileData.Length >= 5) && (Global.tmpKindOfOP != "RE") && (Global.tmpKindOfOP != "KS"))
                                 {
                                     Global.tmpSubstring = Global.tmpFileData.Substring(2, 1);
@@ -2644,13 +2654,13 @@ namespace KasTAS
                                     }
                                     else
                                     {
-                                        // Error: Instruction has a format error.
+                                        // Error: OpCode has a format error.
                                         WRT.WR(Global.tmpSubstring, "White", "Red");
                                     }
-                                    // Read the buttons and draw them in Control Instructions.
+                                    // Read the buttons and draw them in Control OpCodes.
                                     if ((Global.tmpKindOfOP == "CO") || (Global.tmpKindOfOP == "SP"))
                                     {
-                                        // Instruction is a button control Instruction.
+                                        // OpCode is a button control OpCode.
                                         Global.scriptCodeValid = false;
                                         Global.tmpSubstring = Global.tmpFileData.Substring(3, 2);
                                         if (Global.tmpSubstring == "AA") { Global.scriptCodeValid = true; Global.PV_GROUP = "A"; }
@@ -2691,19 +2701,19 @@ namespace KasTAS
                                             int tmpLateSubstring = Global.tmpFileData.Length - 5;
                                             WRT.WR(Global.tmpSubstring, "Red", "Black");
                                         }
-                                        // Draw the rest of an Instruction if is bigger than 5 spaces.
+                                        // Draw the rest of an OpCode if is bigger than 5 spaces.
                                         if (Global.tmpFileData.Length >= 5)
                                         {
                                             if (Global.tmpKindOfOP == "CO")
                                             {
-                                                // Error: A CO type Instruction shouldn't have more characters.
+                                                // Error: A CO type OpCode shouldn't have more characters.
                                                 int tmpLateSubstring = Global.tmpFileData.Length - 5;
                                                 Global.tmpSubstring = Global.tmpFileData.Substring(5, tmpLateSubstring);
                                                 WRT.WR(Global.tmpSubstring, "Red", "Black");
                                             }
                                             if (Global.tmpKindOfOP == "SP")
                                             {
-                                                // Get SoftPush Instruction time value.
+                                                // Get SoftPush OpCode time value.
                                                 WRT.WR(" ", "White", "Black");
                                                 int tmpLateSubstring = Global.tmpFileData.Length - 6;
                                                 Global.tmpSubstring = Global.tmpFileData.Substring(6, tmpLateSubstring);
@@ -2715,7 +2725,7 @@ namespace KasTAS
                                     }
                                     else if (Global.tmpKindOfOP == "JU")
                                     {
-                                        // Instruction is a Jump Instruction.
+                                        // OpCode is a Jump OpCode.
                                         int tmpLateSubstring = Global.tmpFileData.Length - 3;
                                         Global.tmpSubstring = Global.tmpFileData.Substring(3, tmpLateSubstring);
                                         Global.tmpOPValueCache = Global.tmpSubstring;
@@ -2723,7 +2733,7 @@ namespace KasTAS
                                     }
                                     else if (Global.tmpKindOfOP == "TI")
                                     {
-                                        // Instruction is a Time/Wait Instruction.
+                                        // OpCode is a Time/Wait OpCode.
                                         int tmpLateSubstring = Global.tmpFileData.Length - 3;
                                         Global.tmpSubstring = Global.tmpFileData.Substring(3, tmpLateSubstring);
                                         Global.tmpOPValueCache = Global.tmpSubstring;
@@ -2731,7 +2741,7 @@ namespace KasTAS
                                     }
                                     else if (Global.tmpKindOfOP == "JT")
                                     {
-                                        // Instruction is a Jump X Times Instruction.
+                                        // OpCode is a Jump X Times OpCode.
                                         // Get how many times it will repeat (Max = 99).
                                         Global.tmpSubstring = Global.tmpFileData.Substring(3, 2);
                                         WRT.WR(Global.tmpSubstring, "DarkCyan", "Black");
@@ -2739,7 +2749,7 @@ namespace KasTAS
                                         Global.tmpSubstring = Global.tmpFileData.Substring(5, 1);
                                         if (Global.tmpSubstring == " ")
                                         {
-                                            // Is a valid JT Instruction. Draw line on screen.
+                                            // Is a valid JT OpCode. Draw line on screen.
                                             WRT.WR(" ", "White", "Black");
                                             int tmpLateSubstring = Global.tmpFileData.Length - 6;
                                             Global.tmpSubstring = Global.tmpFileData.Substring(6, tmpLateSubstring);
@@ -2748,7 +2758,7 @@ namespace KasTAS
                                         }
                                         else
                                         {
-                                            // Error: Format error on JT Instruction.
+                                            // Error: Format error on JT OpCode.
                                             WRT.WR(" ", "White", "Black");
                                             int tmpLateSubstring = Global.tmpFileData.Length - 6;
                                             Global.tmpSubstring = Global.tmpFileData.Substring(6, tmpLateSubstring);
@@ -2759,10 +2769,10 @@ namespace KasTAS
                                 }
                                 else if (((Global.tmpFileData.Length > 3) && (Global.tmpFileData.Length < 5)) && (Global.tmpKindOfOP != "RE"))
                                 {
-                                    // Special case for small value Instructions.
+                                    // Special case for small value OpCodes.
                                     if (Global.tmpKindOfOP == "JU")
                                     {
-                                        // Instruction is a Jump Instruction.
+                                        // OpCode is a Jump OpCode.
                                         int tmpLateSubstring = Global.tmpFileData.Length - 3;
                                         Global.tmpSubstring = Global.tmpFileData.Substring(3, tmpLateSubstring);
                                         Global.tmpOPValueCache = Global.tmpSubstring;
@@ -2771,7 +2781,7 @@ namespace KasTAS
                                     }
                                     else if (Global.tmpKindOfOP == "TI")
                                     {
-                                        // Instruction is a Time/Wait Instruction.
+                                        // OpCode is a Time/Wait OpCode.
                                         int tmpLateSubstring = Global.tmpFileData.Length - 3;
                                         Global.tmpSubstring = Global.tmpFileData.Substring(3, tmpLateSubstring);
                                         Global.tmpOPValueCache = Global.tmpSubstring;
@@ -2780,7 +2790,7 @@ namespace KasTAS
                                     }
                                     else if (Global.tmpKindOfOP == "JT")
                                     {
-                                        // Instruction is a Jump X Times Instruction.
+                                        // OpCode is a Jump X Times OpCode.
                                         // Get how many times it will repeat (Max = 99).
                                         Global.tmpSubstring = Global.tmpFileData.Substring(3, 2);
                                         WRT.WR(" ", "White", "Black");
@@ -2789,7 +2799,7 @@ namespace KasTAS
                                         Global.tmpSubstring = Global.tmpFileData.Substring(5, 1);
                                         if (Global.tmpSubstring == " ")
                                         {
-                                            // Is a valid JT Instruction. Draw line on screen.
+                                            // Is a valid JT OpCode. Draw line on screen.
                                             WRT.WR(" ", "White", "Black");
                                             int tmpLateSubstring = Global.tmpFileData.Length - 6;
                                             Global.tmpSubstring = Global.tmpFileData.Substring(6, tmpLateSubstring);
@@ -2798,7 +2808,7 @@ namespace KasTAS
                                         }
                                         else
                                         {
-                                            // Error: Format error on JT Instruction.
+                                            // Error: Format error on JT OpCode.
                                             WRT.WR(" ", "White", "Black");
                                             int tmpLateSubstring = Global.tmpFileData.Length - 6;
                                             Global.tmpSubstring = Global.tmpFileData.Substring(6, tmpLateSubstring);
@@ -2812,7 +2822,7 @@ namespace KasTAS
                             Global.tmpWritePad = "| ";
                             Global.tmpWritePad = (Global.tmpWritePad).PadLeft((31 - Global.tmpFileData.Length), Global.charSpace);
                             WRT.WR(Global.tmpWritePad, "DarkMagenta", "Black");
-                            // Execute readed Instructions.
+                            // Execute readed OpCodes.
                             // PB - Push Button.
                             if (Global.tmpOPCache == "PB")
                             {
@@ -3666,7 +3676,7 @@ namespace KasTAS
                             {
                                 Global.tmpLineCursor = tmpFileSize + 1;
                             }
-                            // Calculate the Delta time between Instructions.
+                            // Calculate the Delta time between OpCodes.
                             if (Global.SW.ElapsedMilliseconds >= 1000000)
                             {
                                 Global.tmpLastMillis = Convert.ToInt32(Global.SW.ElapsedMilliseconds) - 1000000;
@@ -3763,7 +3773,7 @@ namespace KasTAS
                     Global.restartArea = true;
                     GC.Collect();
                 }
-                if ((Global.tmpUserInput == "2") || (Global.tmpUserInput == "E") || (Global.tmpUserInput == "e"))
+                if ((Global.tmpUserInput == "2") || (Global.tmpUserInput.ToLower() == "e"))
                 {
                     Global.KSOAutoScriptExecuteMode = false;
                     Global.tmpUserInput = "NULL";
@@ -3787,27 +3797,27 @@ namespace KasTAS
             GUI.DrawCreditHint();
             Global.flagFirstRun = false;
             Global.tmpUserInput = EXF.StaticPrompt();
-            if ((Global.tmpUserInput == "1") || (Global.tmpUserInput == "C") || (Global.tmpUserInput == "c"))
+            if ((Global.tmpUserInput == "1") || (Global.tmpUserInput.ToLower() == "c"))
             {
                 Global.configKeysMode = true;
                 EXF.ConfigKeys();
             }
-            else if ((Global.tmpUserInput == "2") || (Global.tmpUserInput == "T") || (Global.tmpUserInput == "t"))
+            else if ((Global.tmpUserInput == "2") || (Global.tmpUserInput.ToLower() == "t"))
             {
                 Global.testKeysMode = true;
                 EXF.TestKeys();
             }
-            else if ((Global.tmpUserInput == "3") || (Global.tmpUserInput == "R") || (Global.tmpUserInput == "r"))
+            else if ((Global.tmpUserInput == "3") || (Global.tmpUserInput.ToLower() == "r"))
             {
                 Global.KSOAutoScriptReadMode = true;
                 EXF.ReadKAS();
             }
-            else if ((Global.tmpUserInput == "4") || (Global.tmpUserInput == "E") || (Global.tmpUserInput == "e"))
+            else if ((Global.tmpUserInput == "4") || (Global.tmpUserInput.ToLower() == "e"))
             {
                 Global.KSOAutoScriptExecuteMode = true;
                 EXF.ExecuteKAS();
             }
-            else if ((Global.tmpUserInput == "5") || (Global.tmpUserInput == "M") || (Global.tmpUserInput == "m"))
+            else if ((Global.tmpUserInput == "5") || (Global.tmpUserInput.ToLower() == "m"))
             {
                 Global.SysConfig = true;
                 EXF.ChangeTarget();

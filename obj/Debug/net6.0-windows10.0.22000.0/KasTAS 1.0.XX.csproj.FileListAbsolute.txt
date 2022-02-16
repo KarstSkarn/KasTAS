@@ -1,0 +1,36 @@
+E:\VStudio Repos\KasTAS PureC\bin\Debug\net6.0-windows10.0.22000.0\Microsoft.Windows.SDK.NET.dll
+E:\VStudio Repos\KasTAS PureC\bin\Debug\net6.0-windows10.0.22000.0\WinRT.Runtime.dll
+E:\VStudio Repos\KasTAS PureC\obj\Debug\net6.0-windows10.0.22000.0\KasTAS 1.0.XX.csproj.AssemblyReference.cache
+E:\VStudio Repos\KasTAS PureC\obj\Debug\net6.0-windows10.0.22000.0\KasTAS 1.0.XX.GeneratedMSBuildEditorConfig.editorconfig
+E:\VStudio Repos\KasTAS PureC\obj\Debug\net6.0-windows10.0.22000.0\KasTAS 1.0.XX.AssemblyInfoInputs.cache
+E:\VStudio Repos\KasTAS PureC\obj\Debug\net6.0-windows10.0.22000.0\KasTAS 1.0.XX.AssemblyInfo.cs
+E:\VStudio Repos\KasTAS PureC\obj\Debug\net6.0-windows10.0.22000.0\KasTAS 1.0.XX.csproj.CoreCompileInputs.cache
+E:\VStudio Repos\KasTAS PureC\obj\Debug\net6.0-windows10.0.22000.0\KasTAS 1.0.XX.csproj.CopyComplete
+E:\VStudio Repos\KasTAS PureC\obj\Debug\net6.0-windows10.0.22000.0\KasTAS 1.0.XX.genruntimeconfig.cache
+E:\VStudio Repos\KasTAS PureC\bin\Debug\net6.0-windows10.0.22000.0\KasTAS 1.0.98.exe
+E:\VStudio Repos\KasTAS PureC\bin\Debug\net6.0-windows10.0.22000.0\KasTAS 1.0.98.deps.json
+E:\VStudio Repos\KasTAS PureC\bin\Debug\net6.0-windows10.0.22000.0\KasTAS 1.0.98.runtimeconfig.json
+E:\VStudio Repos\KasTAS PureC\bin\Debug\net6.0-windows10.0.22000.0\KasTAS 1.0.98.dll
+E:\VStudio Repos\KasTAS PureC\bin\Debug\net6.0-windows10.0.22000.0\ref\KasTAS 1.0.98.dll
+E:\VStudio Repos\KasTAS PureC\bin\Debug\net6.0-windows10.0.22000.0\KasTAS 1.0.98.pdb
+E:\VStudio Repos\KasTAS PureC\obj\Debug\net6.0-windows10.0.22000.0\KasTAS 1.0.98.dll
+E:\VStudio Repos\KasTAS PureC\obj\Debug\net6.0-windows10.0.22000.0\ref\KasTAS 1.0.98.dll
+E:\VStudio Repos\KasTAS PureC\obj\Debug\net6.0-windows10.0.22000.0\KasTAS 1.0.98.pdb
+E:\VStudio Repos\KasTAS 1.0.98 GH\bin\Debug\net6.0-windows10.0.22000.0\KasTAS 1.0.98.exe
+E:\VStudio Repos\KasTAS 1.0.98 GH\bin\Debug\net6.0-windows10.0.22000.0\KasTAS 1.0.98.deps.json
+E:\VStudio Repos\KasTAS 1.0.98 GH\bin\Debug\net6.0-windows10.0.22000.0\KasTAS 1.0.98.runtimeconfig.json
+E:\VStudio Repos\KasTAS 1.0.98 GH\bin\Debug\net6.0-windows10.0.22000.0\KasTAS 1.0.98.dll
+E:\VStudio Repos\KasTAS 1.0.98 GH\bin\Debug\net6.0-windows10.0.22000.0\KasTAS 1.0.98.pdb
+E:\VStudio Repos\KasTAS 1.0.98 GH\bin\Debug\net6.0-windows10.0.22000.0\Microsoft.Windows.SDK.NET.dll
+E:\VStudio Repos\KasTAS 1.0.98 GH\bin\Debug\net6.0-windows10.0.22000.0\WinRT.Runtime.dll
+E:\VStudio Repos\KasTAS 1.0.98 GH\obj\Debug\net6.0-windows10.0.22000.0\KasTAS 1.0.XX.csproj.AssemblyReference.cache
+E:\VStudio Repos\KasTAS 1.0.98 GH\obj\Debug\net6.0-windows10.0.22000.0\KasTAS 1.0.XX.GeneratedMSBuildEditorConfig.editorconfig
+E:\VStudio Repos\KasTAS 1.0.98 GH\obj\Debug\net6.0-windows10.0.22000.0\KasTAS 1.0.XX.AssemblyInfoInputs.cache
+E:\VStudio Repos\KasTAS 1.0.98 GH\obj\Debug\net6.0-windows10.0.22000.0\KasTAS 1.0.XX.AssemblyInfo.cs
+E:\VStudio Repos\KasTAS 1.0.98 GH\obj\Debug\net6.0-windows10.0.22000.0\KasTAS 1.0.XX.csproj.CoreCompileInputs.cache
+E:\VStudio Repos\KasTAS 1.0.98 GH\obj\Debug\net6.0-windows10.0.22000.0\KasTAS 1.0.XX.csproj.CopyComplete
+E:\VStudio Repos\KasTAS 1.0.98 GH\obj\Debug\net6.0-windows10.0.22000.0\KasTAS 1.0.98.dll
+E:\VStudio Repos\KasTAS 1.0.98 GH\obj\Debug\net6.0-windows10.0.22000.0\ref\KasTAS 1.0.98.dll
+E:\VStudio Repos\KasTAS 1.0.98 GH\obj\Debug\net6.0-windows10.0.22000.0\KasTAS 1.0.98.pdb
+E:\VStudio Repos\KasTAS 1.0.98 GH\obj\Debug\net6.0-windows10.0.22000.0\KasTAS 1.0.XX.genruntimeconfig.cache
+E:\VStudio Repos\KasTAS 1.0.98 GH\obj\Debug\net6.0-windows10.0.22000.0\refint\KasTAS 1.0.98.dll
