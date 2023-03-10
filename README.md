@@ -46,10 +46,6 @@
 No. What KasTAS really does is emulate that you are pushing keys in your keyboard in the choosen pattern. So **it will work in any active window** or in any emulator if you set up the same keys that you defined in your KasTAS program.
 **Hint:** It will even work if you set up a pattern of keys like *"H", "E", "L", "O"* to write *"HELLO"* in your notepad.
 
-- **Can the program auto-write a Kas Script file meanwhile I manually play a game?**
-
-No. **The program has not any way to detect your keyboard strokes**. The use of the keyboard is single-direction meaning that it can emulate keystrokes but there is no way to read keystrokes.
-
 - **Does it needs to be installed?**
 
 No. The executable is fully standalone. Check the question below for more details.
