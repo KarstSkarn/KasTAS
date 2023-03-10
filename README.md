@@ -1,16 +1,31 @@
-## KasTAS 1.0.98 Readme
+## KasTAS 2.0.84 Readme
 [![KasTAS Icon](https://github.com/KarstSkarn/KasTAS/blob/main/kasicon.png?raw=true "KasTAS Icon")](https://github.com/KarstSkarn/KasTAS/blob/main/kasicon.png "KasTAS Icon")
 ### Readme Index
 
-- [KasTAS 1.0.98 Features](#kastas-1098-features)
+- [KasTAS 2.0.84 Features](#kastas-2084-features)
 - [Common FAQ](#common-faq)
 - [File Security Check](#file-security-check)
 
-### KasTAS 1.0.98 Features
+### KasTAS 2.0.84 Features
+
+**KasTAS 2.0.84 Demo Video (YouTube)** Click the image below.
+
+[![Demo Video](https://img.youtube.com/vi/AIu-sCiuhHQ/3.jpg)](https://www.youtube.com/watch?v=AIu-sCiuhHQ
 
 **KasTAS 1.0.98 Demo Video (YouTube)** Click the image below.
 
 [![Demo Video](https://img.youtube.com/vi/HU0dI5LJBi0/0.jpg)](https://www.youtube.com/watch?v=HU0dI5LJBi0)
+
+##### 2.0.84 Version Features
+
+- Possibility to generate automatically .kas files using live keystroke recording.
+- Windows 10 / 11 compatible only (Due to internal libraries).
+- x64 Compatible only. (Not sure if x86 would work anyway).
+- Control functions (Start/Stop/Pause) meanwhile is executed at the background.
+- Partial internal refactoring and optimization.
+- Minor not-useful features been removed in favour to a better optimization.
+
+##### 1.0.98 Version Features
 
 - Full support for a total of 21 Virtual Keys / Buttons.
 - Stable use of *.kas* Script files fully tested.
@@ -39,7 +54,7 @@ No. **The program has not any way to detect your keyboard strokes**. The use of 
 
 No. The executable is fully standalone. Check the question below for more details.
 
-- **Why the executable is so big?**
+- **Why the executable is so big? (1.0.98 Only)**
 
 I know that the executable turned out bigger than I would like. This is caused by two factors.
 First that in this kind of "not really important" programs I preffer standalone versus installable. Thats because in case the user realizes that the program is not what he was looking for, the user can easily remove the whole program by just deleting it without any kind of issue.
@@ -52,6 +67,18 @@ File **is 100% safe**. You can check the following hashes below. Despite this so
 Same issue can be easily found even with empty programs arround the internet as you can see [here (Stack Overflow exposing same issue)](https://stackoverflow.com/questions/60340213/what-could-be-causing-virustotal-to-flag-an-empty-program-as-a-trojan "here (Stack Overflow exposing same issue)").
 
 For transparency purposes here you have the hashes for both the *.zip* and directly the executable below.
+
+###### KasTAS 2.0.84 File Security Check
+
+**KasTAS 2.0.84.zip SHA 256**
+`b70be01ea0ae441de4cf667aab8247625391bcf9c6bd732a0b006f999d44a6e6`
+VirusTotal [link here.](https://www.virustotal.com/gui/file/b70be01ea0ae441de4cf667aab8247625391bcf9c6bd732a0b006f999d44a6e6 "link here.")
+
+**KasTAS 2.0.84.exe SHA 256**
+`218c4a85095f352f987ef1ee175aad80b92425bc06fa3e9deb4780eec2f75644`
+VirusTotal [link here.](https://www.virustotal.com/gui/file/218c4a85095f352f987ef1ee175aad80b92425bc06fa3e9deb4780eec2f75644 "link here.")
+
+###### KasTAS 1.0.98 File Security Check
 
 **KasTAS 1.0.98.zip SHA 256**
 `b3bd0ba23c3205e57bc0a5327de38c05bb00140cc113c04029bc19ae11a7bae9`

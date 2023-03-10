@@ -9,12 +9,16 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Windows.UI.Input;
+using static KasTAS.EXF;
+
+ComWrappers.RegisterForMarshalling(WinFormsComInterop.WinFormsComWrappers.Instance);
 
 // ---------------------------------------------------
 // Code: KasTAS.cs
-// Version: 0.0.94
+// Version: 2.0.94
 // Author: Karst Skarn / Owain#3593 (Discord)
-// Date: 12-01-2022 (Begin) / 21-01-2022 (0.0.94)
+// Date: 12-01-2022 (Begin) / 16-02-2022 (1.0.98) / 10-03-2023 (2.0.84)
 // Description: C# executable able to read from a custom TAS-Script file and execute keyboard patterns.
 // Comments: It should technically work with any kind of emulator/game since it always applies those keys to the active window.
 //           Based on WinKeys by Stefan Stranger.
@@ -36,6 +40,8 @@ namespace KasTAS
         //    UP                 A  |    W                P
         // LE DO RI    SE ST   B    | A  S  D    Z  X   O
         // ---------------------------------------------------
+
+        // Virtual Keyboard / Function Values
         public static string VB_A = "P";
         public static string VB_B = "O";
         public static string VB_ST = "X";
@@ -58,36 +64,33 @@ namespace KasTAS
         public static string VB_E7 = "H";
         public static string VB_E8 = "H";
         public static string VB_E9 = "H";
+        public static string VB_LISTENCONTROLKEY = "L";
+        public static string VB_LISTENMARKERKEY = "J";
+        public static string VB_LISTENEXECUTIONKEY = "K";
 
-        // Target [GB/SNES]
-        public static string SysTarget = "GB";
-        public static bool SysConfig = false;
-        public static string flagExtMode = "false";
-
-        public static int cfgTotalLines = 12;
-        public static int cfgKeyTotalLines = 24;
-        public static string lineSixtyNine = "GOGINGA GOGINGA GOGOGIGOAGOGAGUGGEGA GUNGA GINGA"; // ?
-        public static int cfgValuePos = 18;
-        public static string cfgFile = "kascfg.ini";
-        public static string cfgKeysFile = "keydata.ini";
-        public static int configHoldTime = 7000;
-        public static int configReadyTime = 3000;
-        public static int testReadyTime = 5000;
-        public static int testIncrementalStartTime = 1000;
-        public static int testIncrementalReduction = 50;
-        public static int testContinousTime = 300;
-        public static double testFrameTime = 33.3333;
-
-        public static string lastFileLoaded = "NULL";
-        public static string tmpUserInput = " ";
-        public static bool keepExecuting = true;
-        public static bool configKeysMode = false;
-        public static bool testKeysMode = false;
-        public static bool KSOAutoScriptReadMode = false;
-        public static bool KSOAutoScriptExecuteMode = false;
-        public static bool scriptCodeValid = false;
-        public static bool flagLoadLast = false;
-        public static bool flagFirstRun = true;
+        public static bool L_A = false;
+        public static bool L_B = false;
+        public static bool L_ST = false;
+        public static bool L_SE = false;
+        public static bool L_UP = false;
+        public static bool L_DO = false;
+        public static bool L_LE = false;
+        public static bool L_RI = false;
+        public static bool L_X = false;
+        public static bool L_Y = false;
+        public static bool L_BL = false;
+        public static bool L_BR = false;
+        public static bool L_E0 = false;
+        public static bool L_E1 = false;
+        public static bool L_E2 = false;
+        public static bool L_E3 = false;
+        public static bool L_E4 = false;
+        public static bool L_E5 = false;
+        public static bool L_E6 = false;
+        public static bool L_E7 = false;
+        public static bool L_E8 = false;
+        public static bool L_E9 = false;
+        public static bool L_MARKERKEY = false;
 
         public static bool PV_A = false;
         public static bool PV_B = false;
@@ -101,21 +104,50 @@ namespace KasTAS
         public static bool PV_Y = false;
         public static bool PV_BL = false;
         public static bool PV_BR = false;
-        public static byte PV_RESW = 0;
+        public static PV_GROUPStates PV_GROUP = PV_GROUPStates.None;
+        public static string PV_READGROUP = "NULL";
 
-        public static string PV_GROUP = " ";
-        public static string tmpKindOfOP = "NULL";
-        public static string tmpOPCache = "NULL";
-        public static string tmpOPValueCache = "NULL";
-        public static string tmpOPAuxValueCache = "NULL";
-        public static string tmpPadSpacing = " ";
-        public static string tmpWritePad = " ";
-        public static string tmpHeader = " ";
-        public static string tmpHaltKey = " ";
-        public static string tmpFileData = " ";
-        public static string tmpSubstring = " ";
-        public static List<string> tmpFileArray = new List<string>();
-        public static string tmpLoadString = " ";
+        // Configuration Values
+        public const int cfgTotalLines = 14;
+        public const int cfgKeyTotalLines = 27;
+        public const int cfgValuePos = 18;
+        public static int genCompensationValue = 2;
+        public static int genDelayStackCounter = 40;
+        public static string sysTarget = "DUAL";
+        public static string flagExtMode = "false";
+        public const string cfgFile = "kascfg.ini";
+        public const string cfgKeysFile = "keydata.ini";
+        public static string lastFileLoaded = "NULL";
+        public static string version = "2.0.84";
+        public static string scriptsDirectory = "Scripts/";
+        public static string showTwitchTitle = "true";
+        public static string flagFirstInit = "true";
+
+        // Test Values
+        public static int configHoldTime = 5000;
+        public static int configReadyTime = 2000;
+        public static int testReadyTime = 5000;
+        public static int testIncrementalStartTime = 1000;
+        public static int testIncrementalReduction = 50;
+        public static int testContinousTime = 300;
+        public static double testFrameTime = 33.3333;
+
+        // Execution Values
+        public static byte tmpStackStatus = 0;
+        public static bool sysConfig = false;
+        public static bool keepExecuting = true;
+        public static bool configKeysMode = false;
+        public static bool testKeysMode = false;
+        public static bool KASScriptReadMode = false;
+        public static bool KASScriptExecuteMode = false;
+        public static bool KASScriptGenerateMode = false;
+        public static bool scriptCodeValid = false;
+        public static bool flagLoadLast = false;
+        public static bool flagFirstRun = true;
+        public static bool tmpStackException = false;
+        public static bool tmpIsParsed = false;
+        public static bool tmpFileExists = false;
+        public static bool restartArea = false;
         public static int tmpLastMillis = 0;
         public static int tmpJumpTimes = 0;
         public static int tmpJumpCurrent = 0;
@@ -135,23 +167,31 @@ namespace KasTAS
         public static int tmpReadmodePause = 0;
         public static int tmpReadMaxPause = 19;
         public static int tmpLineCursor = 0;
-        public static bool tmpStackException = false;
-        public static bool tmpIsParsed = false;
-        public static bool tmpFileExists = false;
         public static int outVal = 0;
-        public static byte tmpStackStatus = 0;
+        public static string tmpUserInput = " ";
+        public static OP_States tmpKindOfOP = OP_States.None;
+        public static string tmpReadKindOfOP = "NULL";
+        public static string tmpOPCache = "NULL";
+        public static string tmpOPValueCache = "NULL";
+        public static string tmpOPAuxValueCache = "NULL";
+        public static string tmpPadSpacing = " ";
+        public static string tmpWritePad = " ";
+        public static string tmpHeader = " ";
+        public static string tmpHaltKey = " ";
+        public static string tmpFileData = " ";
+        public static string tmpSubstring = " ";
+        public static string tmpLoadString = " ";
+        public static List<string> tmpFileArray = new List<string>();
+
+        // Console Format Values
         public static char charSpace = ' ';
         public static char charZero = '0';
         public static char charBar = '▄';
         public static char charUpperBar = '▀';
-        public static bool restartArea = false;
         public static int windowH = 21;
         public static int windowW = 82;
-        public static string version = "1.0.98";
-        public static string scriptsDirectory = "Scripts/";
-        public static string showTwitchTitle = "true";
-        public static string flagFirstInit = "true";
 
+        // Object Values
         public static KeysConverter KC = new KeysConverter();
         public static Stopwatch SW = System.Diagnostics.Stopwatch.StartNew();
     }
@@ -170,97 +210,32 @@ namespace KasTAS
             keybd_event((byte)vKey, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
         }
     }
+    public class KeyboardListen
+    {
+        [DllImport("user32.dll")]
+        static extern ushort GetAsyncKeyState(int vKey);
+        public static bool KeyCheck(System.Windows.Forms.Keys vKey)
+        {
+            return 0 != (GetAsyncKeyState((int)vKey) & 0x8000);
+        }
+    }
     public class WRT
     {
-        public static void WRLine(string Text, string FColor, string BColor)
+        public static void WRLine(string text, string FColor, string BColor)
         {
-            if (Text != string.Empty)
-            {
-                if (FColor != string.Empty)
-                {
-                    if (FColor == "White") { System.Console.ForegroundColor = ConsoleColor.White; }
-                    if (FColor == "Gray") { System.Console.ForegroundColor = ConsoleColor.Gray; }
-                    if (FColor == "Black") { System.Console.ForegroundColor = ConsoleColor.Black; }
-                    if (FColor == "Blue") { System.Console.ForegroundColor = ConsoleColor.Blue; }
-                    if (FColor == "Cyan") { System.Console.ForegroundColor = ConsoleColor.Cyan; }
-                    if (FColor == "Green") { System.Console.ForegroundColor = ConsoleColor.Green; }
-                    if (FColor == "Red") { System.Console.ForegroundColor = ConsoleColor.Red; }
-                    if (FColor == "Yellow") { System.Console.ForegroundColor = ConsoleColor.Yellow; }
-                    if (FColor == "Magenta") { System.Console.ForegroundColor = ConsoleColor.Magenta; }
-                    if (FColor == "DarkGray") { System.Console.ForegroundColor = ConsoleColor.DarkGray; }
-                    if (FColor == "DarkBlue") { System.Console.ForegroundColor = ConsoleColor.DarkBlue; }
-                    if (FColor == "DarkCyan") { System.Console.ForegroundColor = ConsoleColor.DarkCyan; }
-                    if (FColor == "DarkGreen") { System.Console.ForegroundColor = ConsoleColor.DarkGreen; }
-                    if (FColor == "DarkRed") { System.Console.ForegroundColor = ConsoleColor.DarkRed; }
-                    if (FColor == "DarkMagenta") { System.Console.ForegroundColor = ConsoleColor.DarkMagenta; }
-                    if (FColor == "DarkYellow") { System.Console.ForegroundColor = ConsoleColor.DarkYellow; }
-                }
-                if (BColor != string.Empty)
-                {
-                    if (BColor == "White") { System.Console.BackgroundColor = ConsoleColor.White; }
-                    if (BColor == "Gray") { System.Console.BackgroundColor = ConsoleColor.Gray; }
-                    if (BColor == "Black") { System.Console.BackgroundColor = ConsoleColor.Black; }
-                    if (BColor == "Blue") { System.Console.BackgroundColor = ConsoleColor.Blue; }
-                    if (BColor == "Cyan") { System.Console.BackgroundColor = ConsoleColor.Cyan; }
-                    if (BColor == "Green") { System.Console.BackgroundColor = ConsoleColor.Green; }
-                    if (BColor == "Red") { System.Console.BackgroundColor = ConsoleColor.Red; }
-                    if (BColor == "Yellow") { System.Console.BackgroundColor = ConsoleColor.Yellow; }
-                    if (BColor == "Magenta") { System.Console.BackgroundColor = ConsoleColor.Magenta; }
-                    if (BColor == "DarkGray") { System.Console.BackgroundColor = ConsoleColor.DarkGray; }
-                    if (BColor == "DarkBlue") { System.Console.BackgroundColor = ConsoleColor.DarkBlue; }
-                    if (BColor == "DarkCyan") { System.Console.BackgroundColor = ConsoleColor.DarkCyan; }
-                    if (BColor == "DarkGreen") { System.Console.BackgroundColor = ConsoleColor.DarkGreen; }
-                    if (BColor == "DarkRed") { System.Console.BackgroundColor = ConsoleColor.DarkRed; }
-                    if (BColor == "DarkMagenta") { System.Console.BackgroundColor = ConsoleColor.DarkMagenta; }
-                    if (BColor == "DarkYellow") { System.Console.BackgroundColor = ConsoleColor.DarkYellow; }
-                }
-                System.Console.WriteLine(Text);
-            }
+            if (text == String.Empty || FColor == String.Empty || BColor == String.Empty) { return; }
+            Console.ForegroundColor = (ConsoleColor)Enum.Parse(typeof(ConsoleColor), FColor);
+            Console.BackgroundColor = (ConsoleColor)Enum.Parse(typeof(ConsoleColor), BColor);
+            System.Console.Write(text + Environment.NewLine);
+            ResetConsoleColor();
         }
-        public static void WR(string Text, string FColor, string BColor)
+        public static void WR(string text, string FColor, string BColor)
         {
-            if (Text != string.Empty)
-            {
-                if (FColor != string.Empty)
-                {
-                    if (FColor == "White") { System.Console.ForegroundColor = ConsoleColor.White; }
-                    if (FColor == "Gray") { System.Console.ForegroundColor = ConsoleColor.Gray; }
-                    if (FColor == "Black") { System.Console.ForegroundColor = ConsoleColor.Black; }
-                    if (FColor == "Blue") { System.Console.ForegroundColor = ConsoleColor.Blue; }
-                    if (FColor == "Cyan") { System.Console.ForegroundColor = ConsoleColor.Cyan; }
-                    if (FColor == "Green") { System.Console.ForegroundColor = ConsoleColor.Green; }
-                    if (FColor == "Red") { System.Console.ForegroundColor = ConsoleColor.Red; }
-                    if (FColor == "Yellow") { System.Console.ForegroundColor = ConsoleColor.Yellow; }
-                    if (FColor == "Magenta") { System.Console.ForegroundColor = ConsoleColor.Magenta; }
-                    if (FColor == "DarkGray") { System.Console.ForegroundColor = ConsoleColor.DarkGray; }
-                    if (FColor == "DarkBlue") { System.Console.ForegroundColor = ConsoleColor.DarkBlue; }
-                    if (FColor == "DarkCyan") { System.Console.ForegroundColor = ConsoleColor.DarkCyan; }
-                    if (FColor == "DarkGreen") { System.Console.ForegroundColor = ConsoleColor.DarkGreen; }
-                    if (FColor == "DarkRed") { System.Console.ForegroundColor = ConsoleColor.DarkRed; }
-                    if (FColor == "DarkMagenta") { System.Console.ForegroundColor = ConsoleColor.DarkMagenta; }
-                    if (FColor == "DarkYellow") { System.Console.ForegroundColor = ConsoleColor.DarkYellow; }
-                }
-                if (BColor != string.Empty)
-                {
-                    if (BColor == "White") { System.Console.BackgroundColor = ConsoleColor.White; }
-                    if (BColor == "Gray") { System.Console.BackgroundColor = ConsoleColor.Gray; }
-                    if (BColor == "Black") { System.Console.BackgroundColor = ConsoleColor.Black; }
-                    if (BColor == "Blue") { System.Console.BackgroundColor = ConsoleColor.Blue; }
-                    if (BColor == "Cyan") { System.Console.BackgroundColor = ConsoleColor.Cyan; }
-                    if (BColor == "Green") { System.Console.BackgroundColor = ConsoleColor.Green; }
-                    if (BColor == "Red") { System.Console.BackgroundColor = ConsoleColor.Red; }
-                    if (BColor == "Yellow") { System.Console.BackgroundColor = ConsoleColor.Yellow; }
-                    if (BColor == "Magenta") { System.Console.BackgroundColor = ConsoleColor.Magenta; }
-                    if (BColor == "DarkGray") { System.Console.BackgroundColor = ConsoleColor.DarkGray; }
-                    if (BColor == "DarkBlue") { System.Console.BackgroundColor = ConsoleColor.DarkBlue; }
-                    if (BColor == "DarkCyan") { System.Console.BackgroundColor = ConsoleColor.DarkCyan; }
-                    if (BColor == "DarkGreen") { System.Console.BackgroundColor = ConsoleColor.DarkGreen; }
-                    if (BColor == "DarkRed") { System.Console.BackgroundColor = ConsoleColor.DarkRed; }
-                    if (BColor == "DarkMagenta") { System.Console.BackgroundColor = ConsoleColor.DarkMagenta; }
-                    if (BColor == "DarkYellow") { System.Console.BackgroundColor = ConsoleColor.DarkYellow; }
-                }
-                System.Console.Write(Text);
-            }
+            if (text == String.Empty || FColor == String.Empty || BColor == String.Empty) { return; }
+            Console.ForegroundColor = (ConsoleColor)Enum.Parse(typeof(ConsoleColor), FColor);
+            Console.BackgroundColor = (ConsoleColor)Enum.Parse(typeof(ConsoleColor), BColor);
+            System.Console.Write(text);
+            ResetConsoleColor();
         }
         public static void ResetConsoleColor()
         {
@@ -293,10 +268,20 @@ namespace KasTAS
             Keys key = (Keys)Global.KC.ConvertFromString(inKey);
             KeyboardSend.KeyDown(key);
         }
+        public static void VK_Down(EXF.PV_GROUPStates pvGroup)
+        {
+            string stringToSend = GetStringFromPV_Group(pvGroup);
+            VK_Down(stringToSend);
+        }
         public static void VK_Up(string inKey)
         {
             Keys key = (Keys)Global.KC.ConvertFromString(inKey);
             KeyboardSend.KeyUp(key);
+        }
+        public static void VK_Up(EXF.PV_GROUPStates pvGroup)
+        {
+            string stringToSend = GetStringFromPV_Group(pvGroup);
+            VK_Up(stringToSend);
         }
         public static void VK_HoldUntil(string inKey, int time)
         {
@@ -304,6 +289,11 @@ namespace KasTAS
             KeyboardSend.KeyDown(key);
             TI.Hold(time);
             KeyboardSend.KeyUp(key);
+        }
+        public static void VK_HoldUntil(EXF.PV_GROUPStates pvGroup, int time)
+        {
+            string stringToSend = GetStringFromPV_Group(pvGroup);
+            VK_HoldUntil(stringToSend, time);
         }
         public static void VK_HoldTurbo(string inKey, int time)
         {
@@ -317,6 +307,11 @@ namespace KasTAS
                 TI.Hold(1);
             }
         }
+        public static void VK_HoldTurbo(EXF.PV_GROUPStates pvGroup, int time)
+        {
+            string stringToSend = GetStringFromPV_Group(pvGroup);
+            VK_HoldTurbo(stringToSend, time);
+        }
         public static void VK_HoldUntilDelay(string inKey, int time)
         {
             Keys key = (Keys)Global.KC.ConvertFromString(inKey);
@@ -324,6 +319,87 @@ namespace KasTAS
             TI.Hold(time);
             KeyboardSend.KeyUp(key);
             TI.Hold(25);
+        }
+        public static void VK_HoldUntilDelay(EXF.PV_GROUPStates pvGroup, int time)
+        {
+            string stringToSend = GetStringFromPV_Group(pvGroup);
+            VK_HoldUntilDelay(stringToSend, time);
+        }
+        private static string GetStringFromPV_Group(EXF.PV_GROUPStates pvGroup)
+        {
+            string stringToSend = "";
+            switch (pvGroup)
+            {
+                case EXF.PV_GROUPStates.None:
+                    break;
+                case EXF.PV_GROUPStates.AA:
+                    stringToSend = Global.VB_A;
+                    break;
+                case EXF.PV_GROUPStates.BB:
+                    stringToSend = Global.VB_B;
+                    break;
+                case EXF.PV_GROUPStates.ST:
+                    stringToSend = Global.VB_ST;
+                    break;
+                case EXF.PV_GROUPStates.SE:
+                    stringToSend = Global.VB_SE;
+                    break;
+                case EXF.PV_GROUPStates.UP:
+                    stringToSend = Global.VB_UP;
+                    break;
+                case EXF.PV_GROUPStates.DO:
+                    stringToSend = Global.VB_DO;
+                    break;
+                case EXF.PV_GROUPStates.LE:
+                    stringToSend = Global.VB_LE;
+                    break;
+                case EXF.PV_GROUPStates.RI:
+                    stringToSend = Global.VB_RI;
+                    break;
+                case EXF.PV_GROUPStates.XX:
+                    stringToSend = Global.VB_X;
+                    break;
+                case EXF.PV_GROUPStates.YY:
+                    stringToSend = Global.VB_Y;
+                    break;
+                case EXF.PV_GROUPStates.BL:
+                    stringToSend = Global.VB_BL;
+                    break;
+                case EXF.PV_GROUPStates.BR:
+                    stringToSend = Global.VB_BR;
+                    break;
+                case EXF.PV_GROUPStates.E0:
+                    stringToSend = Global.VB_E0;
+                    break;
+                case EXF.PV_GROUPStates.E1:
+                    stringToSend = Global.VB_E1;
+                    break;
+                case EXF.PV_GROUPStates.E2:
+                    stringToSend = Global.VB_E2;
+                    break;
+                case EXF.PV_GROUPStates.E3:
+                    stringToSend = Global.VB_E3;
+                    break;
+                case EXF.PV_GROUPStates.E4:
+                    stringToSend = Global.VB_E4;
+                    break;
+                case EXF.PV_GROUPStates.E5:
+                    stringToSend = Global.VB_E5;
+                    break;
+                case EXF.PV_GROUPStates.E6:
+                    stringToSend = Global.VB_E6;
+                    break;
+                case EXF.PV_GROUPStates.E7:
+                    stringToSend = Global.VB_E7;
+                    break;
+                case EXF.PV_GROUPStates.E8:
+                    stringToSend = Global.VB_E8;
+                    break;
+                case EXF.PV_GROUPStates.E9:
+                    stringToSend = Global.VB_E9;
+                    break;
+            }
+            return stringToSend;
         }
     }
     // GUI Functions ~
@@ -365,20 +441,27 @@ namespace KasTAS
             WRT.WR("TAS", "Cyan", "DarkBlue");
             WRT.WR(" ", "White", "DarkBlue");
             WRT.WR(Global.version, "Gray", "DarkBlue");
-            WRT.WR(" 2022(C)", "DarkGray", "DarkBlue");
+            WRT.WR(" 2023(C)", "DarkGray", "DarkBlue");
             WRT.WR(" ", "White", "DarkBlue");
             WRT.WR("          ", "DarkCyan", "DarkBlue");
-            WRT.WR("                  ", "White", "DarkBlue");
+            WRT.WR("                 █", "DarkGray", "DarkBlue");
             if (Global.showTwitchTitle == "true")
             {
-                WRT.WR("www.twitch.tv/karstskarn", "DarkMagenta", "DarkBlue");
+                WRT.WR("  www.twitch.tv/karstskarn", "White", "DarkCyan");
             }
             else
             {
-                WRT.WR("                        ", "DarkMagenta", "DarkBlue");
+                WRT.WR("                          ", "DarkMagenta", "DarkBlue");
             }
             (int curLeft, int curTop) = Console.GetCursorPosition();
-            WRT.WRLine(" ".PadRight(Console.BufferWidth - curLeft - 1, Global.charSpace), "White", "DarkBlue");
+            if (Global.showTwitchTitle == "true")
+            {
+                WRT.WRLine(" ".PadRight(Console.BufferWidth - curLeft - 1, Global.charSpace), "White", "DarkCyan");
+            }
+            else
+            {
+                WRT.WRLine(" ".PadRight(Console.BufferWidth - curLeft - 1, Global.charSpace), "White", "DarkBlue");
+            }
             GUI.DrawUpperBarSpacer();
         }
         public static void DrawMainMenu()
@@ -397,15 +480,27 @@ namespace KasTAS
             WRT.WR("3", "White", "Black");
             WRT.WR(". ", "DarkGray", "Black");
             WRT.WR("R", "White", "Black");
-            WRT.WRLine("ead a KSOAutoScript file.", "DarkGray", "Black");
+            WRT.WRLine("ead a KAS Script file.", "DarkGray", "Black");
             WRT.WR("  ▬ ", "DarkGray", "Black");
             WRT.WR("4", "White", "Black");
             WRT.WR(". ", "DarkGray", "Black");
-            WRT.WR("E", "White", "Black");
-            WRT.WRLine("xecute a KSOAutoScript file.", "DarkGray", "Black");
+            WRT.WR("E", "Cyan", "Black");
+            WRT.WRLine("xecute a KAS Script file.", "DarkGray", "Black");
+            WRT.WR("  ▬ ", "DarkGray", "Black");
+            WRT.WR("5", "White", "Black");
+            WRT.WR(". ", "DarkGray", "Black");
+            WRT.WR("G", "Cyan", "Black");
+            WRT.WRLine("enerate a KAS Script file using your keystrokes.", "DarkGray", "Black");
             GUI.DrawSpacer();
             WRT.WR(" Current key mode is [", "White", "Black");
-            WRT.WR(Global.SysTarget, "Cyan", "Black");
+            if (Global.sysTarget == "DUAL")
+            {
+                WRT.WR("DUAL [A/B - 2 Buttons]", "Cyan", "Black");
+            }
+            if (Global.sysTarget == "QUAD")
+            {
+                WRT.WR("QUAD [A/B/X/Y - 4 Buttons]", "Cyan", "Black");
+            }
             WRT.WRLine("]", "White", "Black");
             WRT.WR(" Extended key mode is [", "White", "Black");
             if (Global.flagExtMode == "true")
@@ -418,7 +513,7 @@ namespace KasTAS
             }
             WRT.WRLine("]", "White", "Black");
             WRT.WR("  ▬ ", "DarkGray", "Black");
-            WRT.WR("5", "White", "Black");
+            WRT.WR("6", "White", "Black");
             WRT.WR(". ", "DarkGray", "Black");
             WRT.WR("M", "White", "Black");
             WRT.WRLine("anage output modes.", "DarkGray", "Black");
@@ -428,17 +523,19 @@ namespace KasTAS
             WRT.WRLine("file in the prompt", "White", "Black");
             WRT.WRLine(" and will be executed regardless of the menu you are in.", "White", "Black");
             GUI.DrawSpacer();
-            WRT.WR(" Press ", "DarkGray", "Black");
-            WRT.WR("CTRL + C", "White", "Black");
-            WRT.WR(" or ", "DarkGray", "Black");
-            WRT.WR("CTRL + BREAK", "White", "Black");
-            WRT.WRLine(" to force the executable shutdown.", "DarkGray", "Black");
+            WRT.WR(" Press the execution control key ", "DarkGray", "Black");
+            WRT.WR("[", "White", "Black");
+            WRT.WR(Global.VB_LISTENEXECUTIONKEY, "Green", "Black");
+            WRT.WR("]", "White", "Black");
+            WRT.WRLine(" to stop a script execution.", "DarkGray", "Black");
             GUI.DrawSpacer();
         }
         public static void DrawCreditHint()
         {
             Console.SetCursorPosition(0, Global.windowH - 4);
-            WRT.WR(" Type $Credit for use info.", "DarkGray", "Black");
+            WRT.WR(" Type ", "DarkGray", "Black");
+            WRT.WR("$Credit", "Gray", "Black");
+            WRT.WR(" for use info.", "DarkGray", "Black");
         }
         public static void DrawSubtitle(string title)
         {
@@ -449,9 +546,9 @@ namespace KasTAS
         public static void DrawReadMenu()
         {
             GUI.DrawTitle();
-            GUI.DrawSubtitle("KSOAutoScript Visualizer");
+            GUI.DrawSubtitle("KAS Script Visualizer");
             GUI.DrawSpacer();
-            WRT.WRLine(" Here you can read a KSOAutoScript file and check its syntax", "DarkGray", "Black");
+            WRT.WRLine(" Here you can read a KAS Script file and check its syntax", "DarkGray", "Black");
             WRT.WRLine(" integrity.", "DarkGray", "Black");
             GUI.DrawSpacer();
             WRT.WR("  ▬ ", "DarkGray", "Black");
@@ -469,9 +566,9 @@ namespace KasTAS
         public static void DrawExecuteMenu()
         {
             GUI.DrawTitle();
-            GUI.DrawSubtitle("KSOAutoScript Execution");
+            GUI.DrawSubtitle("KAS Script Execution");
             GUI.DrawSpacer();
-            WRT.WRLine(" Here you can execute a KSOAutoScript.", "DarkGray", "Black");
+            WRT.WRLine(" Here you can execute a KAS Script.", "DarkGray", "Black");
             GUI.DrawSpacer();
             WRT.WR("  ▬ ", "DarkGray", "Black");
             WRT.WR("1", "White", "Black");
@@ -526,7 +623,7 @@ namespace KasTAS
             WRT.WR("E", "Blue", "Black"); ;
             WRT.WRLine("xit test mode.", "DarkGray", "Black");
             GUI.DrawSpacer();
-            WRT.WRLine(" Note: All tests are performed with the GB buttons only.", "White", "Black");
+            WRT.WRLine(" Note: All tests are performed with the DUAL buttons only.", "White", "Black");
             GUI.DrawSpacer();
         }
         public static void DrawConfigMenu()
@@ -709,13 +806,13 @@ namespace KasTAS
             WRT.WR("  ▬ ", "DarkGray", "Black");
             WRT.WR("1", "White", "Black");
             WRT.WR(". ", "DarkGray", "Black");
-            WRT.WR("G", "White", "Black");
-            WRT.WRLine("B.", "DarkGray", "Black");
+            WRT.WR("D", "White", "Black");
+            WRT.WRLine("ual main buttons mode (A/B - 2 Buttons).", "DarkGray", "Black");
             WRT.WR("  ▬ ", "DarkGray", "Black");
             WRT.WR("2", "White", "Black");
             WRT.WR(". ", "DarkGray", "Black");
-            WRT.WR("S", "White", "Black");
-            WRT.WRLine("NES.", "DarkGray", "Black");
+            WRT.WR("Q", "White", "Black");
+            WRT.WRLine("uad main buttons mode (A/B/X/Y - 4 Buttons).", "DarkGray", "Black");
             GUI.DrawSpacer();
             WRT.WRLine(" Extended keys mode.", "White", "Black");
             WRT.WR("  ▬ ", "DarkGray", "Black");
@@ -731,10 +828,153 @@ namespace KasTAS
             WRT.WRLine("xit.", "DarkGray", "Black");
             GUI.DrawSpacer();
         }
+        public static void DrawGenerateMenu()
+        {
+            GUI.DrawTitle();
+            GUI.DrawSubtitle("KAS Script Generation");
+            GUI.DrawSpacer();
+            WRT.WRLine(" Here you can generate a KAS Script using your keystrokes.", "DarkGray", "Black");
+            GUI.DrawSpacer();
+            WRT.WRLine(" Use the following key to Start/Stop the keystrokes recording.", "DarkGray", "Black");
+            WRT.WR(" Current control key is set as [", "White", "Black");
+            WRT.WR(Global.VB_LISTENCONTROLKEY, "Green", "Black");
+            WRT.WRLine("]", "White", "Black");
+            WRT.WR(" Current insert marker key is set as [", "White", "Black");
+            WRT.WR(Global.VB_LISTENMARKERKEY, "Green", "Black");
+            WRT.WRLine("]", "White", "Black");
+            WRT.WR(" You can change those keys in the ", "DarkGray", "Black");
+            WRT.WR("<keydata.ini>", "Gray", "Black");
+            WRT.WRLine(" file.", "DarkGray", "Black");
+            GUI.DrawSpacer();
+            WRT.WR("  ▬ ", "DarkGray", "Black");
+            WRT.WR("1", "White", "Black");
+            WRT.WR(". ", "DarkGray", "Black");
+            WRT.WR("G", "White", "Black");
+            WRT.WRLine("enerate a KAS Script file.", "DarkGray", "Black");
+            WRT.WR("  ▬ ", "DarkGray", "Black");
+            WRT.WR("2", "White", "Black");
+            WRT.WR(". ", "DarkGray", "Black");
+            WRT.WR("E", "Blue", "Black");
+            WRT.WRLine("xit.", "DarkGray", "Black");
+            GUI.DrawSpacer();
+            WRT.WR(" NOTE:", "White", "Black");
+            WRT.WR(" This function will ", "DarkGray", "Black");
+            WRT.WR("only", "White", "Black");
+            WRT.WRLine(" record the keystrokes that match", "DarkGray", "Black");
+            WRT.WRLine(" the ones set in the keyboard keys configuration file!", "DarkGray", "Black");
+            GUI.DrawSpacer();
+        }
+        public static void DrawGenFileMenu()
+        {
+            GUI.DrawTitle();
+            GUI.DrawSubtitle("KAS Script Generation");
+            GUI.DrawSpacer();
+            WRT.WRLine(" Write the name of the file that will be created.", "DarkGray", "Black");
+            GUI.DrawSpacer();
+            WRT.WR(" NOTE: ", "White", "Black");
+            WRT.WRLine("If the file already exists it may be overwritten!", "Red", "Black");
+            WRT.WR(" Be sure to add the proper <.kas> extension when writing the name of the file!", "DarkGray", "Black");
+
+        }
+        public static void DrawGenFilePanel()
+        {
+            GUI.FormatConsoleExpBuffer();
+            GUI.DrawTitle();
+            WRT.WR(" The recording will begin when the control key ", "DarkGray", "Black");
+            WRT.WR("[", "White", "Black");
+            WRT.WR(Global.VB_LISTENCONTROLKEY, "Green", "Black");
+            WRT.WR("]", "White", "Black");
+            WRT.WRLine(" is pressed.", "DarkGray", "Black");
+            WRT.WR(" Press the control key ", "DarkGray", "Black");
+            WRT.WR("[", "White", "Black");
+            WRT.WR(Global.VB_LISTENCONTROLKEY, "Green", "Black");
+            WRT.WR("]", "White", "Black");
+            WRT.WRLine(" again to stop the recording.", "DarkGray", "Black");
+            GUI.DrawSpacer();
+            WRT.WR(" Current file: ", "White", "Black");
+            WRT.WRLine("<" + Global.lastFileLoaded + ">", "Green", "Black");
+            GUI.DrawSpacer();
+            WRT.WR(" Current active compensation delay: ", "Gray", "Black");
+            WRT.WR(Global.genCompensationValue.ToString(), "Green", "Black");
+            WRT.WRLine("ms ", "Gray", "Black");
+            WRT.WR(" Current delay stack counter: ", "Gray", "Black");
+            WRT.WR(Global.genDelayStackCounter.ToString(), "Green", "Black");
+            GUI.DrawSpacer();
+            WRT.WR(" Set those values to zero in the ", "DarkGray", "Black");
+            WRT.WR("<kascfg.ini>", "White", "Black");
+            WRT.WR(" to disable them.", "DarkGray", "Black");
+            GUI.DrawSpacer();
+        }
+        public static void DrawGenEndFile()
+        {
+            GUI.FormatConsoleExpBuffer();
+            GUI.DrawTitle();
+            WRT.WRLine(" File generated successfully! ", "White", "Black");
+            GUI.DrawSpacer();
+            WRT.WR(" File name: ", "Gray", "Black");
+            WRT.WRLine("<" + Global.lastFileLoaded + ">", "Green", "Black");
+            FileInfo scriptFileInfo = new FileInfo(Global.scriptsDirectory + Global.lastFileLoaded);
+            int tmpFileSize = File.ReadLines(Global.scriptsDirectory + Global.lastFileLoaded).Count();
+            long tmpFileWeight = scriptFileInfo.Length;
+            WRT.WR(" File size: ", "Gray", "Black");
+            WRT.WRLine(tmpFileSize.ToString() + " Bytes", "Green", "Black");
+            WRT.WR(" File lenght: ", "Gray", "Black");
+            WRT.WRLine(tmpFileWeight.ToString() + " Lines", "Green", "Black");
+            GUI.DrawSpacer();
+            WRT.WRLine(" You can write the file name to execute it now.", "DarkGray", "Black");
+            GUI.DrawSpacer();
+            WRT.WR("  ▬ ", "DarkGray", "Black");
+            WRT.WR("1", "White", "Black");
+            WRT.WR(". ", "DarkGray", "Black");
+            WRT.WR("E", "Blue", "Black");
+            WRT.WRLine("xit back to the menu.", "DarkGray", "Black");
+            EXF.StaticPrompt();
+        }
     }
     // Execution Functions ~
     public class EXF
     {
+        // Instruction Enums
+        public enum PV_GROUPStates
+        {
+            None,
+            AA,
+            BB,
+            ST,
+            SE,
+            UP,
+            DO,
+            LE,
+            RI,
+            XX,
+            YY,
+            BL,
+            BR,
+            E0,
+            E1,
+            E2,
+            E3,
+            E4,
+            E5,
+            E6,
+            E7,
+            E8,
+            E9
+        }
+        public enum OP_States
+        {
+            None,
+            CO,
+            JT,
+            SP,
+            JU,
+            TI,
+            RE,
+            EN,
+            KS,
+            RM
+        }
+
         public static void LineChanger(string newText, string fileName, int line_to_edit)
         {
             string[] arrLine = File.ReadAllLines(fileName);
@@ -752,10 +992,12 @@ namespace KasTAS
             05 INCR REDC T  = 50
             06 TST CONT T   = 300
             07 TST FRAME T  = 33.3333
-            08 SYS TARGET   = GB
+            08 SYS TARGET   = DUAL
             09 TIME RES.    = 1
             10 READ PAUSE   = 100
             11 SHOW TW      = true
+            12 GEN. COMP.D. = 2
+            13 GEN. STACK   = 40
             */
             if (Directory.Exists("Scripts") == false)
             {
@@ -833,7 +1075,7 @@ namespace KasTAS
                     {
                         int tmpLateSubstring = tmpFileData.Length - Global.cfgValuePos;
                         string tmpSubString = tmpFileData.Substring(Global.cfgValuePos, tmpLateSubstring);
-                        Global.SysTarget = tmpSubString;
+                        Global.sysTarget = tmpSubString;
                     }
                     if (ii == 9)
                     {
@@ -853,6 +1095,18 @@ namespace KasTAS
                         string tmpSubString = tmpFileData.Substring(Global.cfgValuePos, tmpLateSubstring);
                         Global.showTwitchTitle = tmpSubString;
                     }
+                    if (ii == 12)
+                    {
+                        int tmpLateSubstring = tmpFileData.Length - Global.cfgValuePos;
+                        string tmpSubString = tmpFileData.Substring(Global.cfgValuePos, tmpLateSubstring);
+                        Global.genCompensationValue = Convert.ToInt32(tmpSubString);
+                    }
+                    if (ii == 13)
+                    {
+                        int tmpLateSubstring = tmpFileData.Length - Global.cfgValuePos;
+                        string tmpSubString = tmpFileData.Substring(Global.cfgValuePos, tmpLateSubstring);
+                        Global.genDelayStackCounter = Convert.ToInt32(tmpSubString);
+                    }
                 }
             }
             else
@@ -868,26 +1122,33 @@ namespace KasTAS
         public static void LoadKeyConfig()
         {
             /*
-            00 SYS TARGET   = GB
+            00 SYS TARGET   = DUAL
             01 EXTRA MODE   = false
-            01 BUTTON A     = P
-            02 BUTTON B     = O
-            03 BUTTON START = X
-            04 BUTTON SELEC = Z
-            05 BUTTON UP    = W
-            06 BUTTON DOWN  = S
-            07 BUTTON LEFT  = A
-            08 BUTTON RIGHT = D
-            09 E0           = H
-            10 E1           = H
-            11 E2           = H
-            12 E3           = H
-            13 E4           = H
-            14 E5           = H
-            15 E6           = H
-            16 E7           = H
-            17 E8           = H
-            18 E9           = H
+            02 BUTTON A     = P
+            03 BUTTON B     = O
+            04 BUTTON START = X
+            05 BUTTON SELEC = Z
+            06 BUTTON UP    = W
+            07 BUTTON DOWN  = S
+            08 BUTTON LEFT  = A
+            09 BUTTON RIGHT = D
+            10 BUTTON X     = 0
+            11 BUTTON Y     = 9
+            12 BUTTON U.LE. = 1
+            13 BUTTON U.RI. = 3
+            14 E0           = H
+            15 E1           = H
+            16 E2           = H
+            17 E3           = H
+            18 E4           = H
+            19 E5           = H
+            20 E6           = H
+            21 E7           = H
+            22 E8           = H
+            23 E9           = H
+            24 LISTEN C.KEY = L
+            25 LISTEN MARK. = J
+            26 LISTEN EXEC. = K
             */
             Global.tmpFileExists = File.Exists(Global.cfgKeysFile);
             if (Global.tmpFileExists == false)
@@ -913,7 +1174,7 @@ namespace KasTAS
                     {
                         int tmpLateSubstring = tmpFileData.Length - Global.cfgValuePos;
                         string tmpSubString = tmpFileData.Substring(Global.cfgValuePos, tmpLateSubstring);
-                        Global.SysTarget = tmpSubString;
+                        Global.sysTarget = tmpSubString;
                     }
                     if (ii == 1)
                     {
@@ -1053,6 +1314,24 @@ namespace KasTAS
                         string tmpSubString = tmpFileData.Substring(Global.cfgValuePos, tmpLateSubstring);
                         Global.VB_E9 = tmpSubString;
                     }
+                    if (ii == 24)
+                    {
+                        int tmpLateSubstring = tmpFileData.Length - Global.cfgValuePos;
+                        string tmpSubString = tmpFileData.Substring(Global.cfgValuePos, tmpLateSubstring);
+                        Global.VB_LISTENCONTROLKEY = tmpSubString;
+                    }
+                    if (ii == 25)
+                    {
+                        int tmpLateSubstring = tmpFileData.Length - Global.cfgValuePos;
+                        string tmpSubString = tmpFileData.Substring(Global.cfgValuePos, tmpLateSubstring);
+                        Global.VB_LISTENMARKERKEY = tmpSubString;
+                    }
+                    if (ii == 26)
+                    {
+                        int tmpLateSubstring = tmpFileData.Length - Global.cfgValuePos;
+                        string tmpSubString = tmpFileData.Substring(Global.cfgValuePos, tmpLateSubstring);
+                        Global.VB_LISTENEXECUTIONKEY = tmpSubString;
+                    }
                 }
             }
             else
@@ -1090,7 +1369,7 @@ namespace KasTAS
                     if ((Global.tmpUserInput != "N") && (Global.tmpUserInput != "n"))
                     {
                         Global.flagLoadLast = true;
-                        Global.KSOAutoScriptExecuteMode = true;
+                        Global.KASScriptExecuteMode = true;
                         Global.flagFirstRun = false;
                         EXF.ExecuteKAS();
                     }
@@ -1110,6 +1389,31 @@ namespace KasTAS
             {
                 // Here it used to be a disclaimer message in older versions.
             }
+        }
+        public static void ResetKeyboardBooleans()
+        {
+            Global.L_A = false;
+            Global.L_B = false;
+            Global.L_ST = false;
+            Global.L_SE = false;
+            Global.L_UP = false;
+            Global.L_DO = false;
+            Global.L_LE = false;
+            Global.L_RI = false;
+            Global.L_X = false;
+            Global.L_Y = false;
+            Global.L_BL = false;
+            Global.L_BR = false;
+            Global.L_E0 = false;
+            Global.L_E1 = false;
+            Global.L_E2 = false;
+            Global.L_E3 = false;
+            Global.L_E4 = false;
+            Global.L_E5 = false;
+            Global.L_E6 = false;
+            Global.L_E7 = false;
+            Global.L_E8 = false;
+            Global.L_E9 = false;
         }
         public static void WriteToCfg(int line, string value)
         {
@@ -1176,6 +1480,29 @@ namespace KasTAS
             WRT.WR(" to execute the script.", "DarkGray", "Black");
             System.Console.ReadLine();
         }
+        public static void RemoteExecutionHalt()
+        {
+            Console.SetCursorPosition(0, Global.windowH - 3);
+            GUI.DrawLowerBarSpacer();
+            WRT.WR(" ▬ ", "Cyan", "Black");
+            WRT.WR("Press ", "DarkGray", "Black");
+            WRT.WR("[ENTER]", "White", "Black");
+            WRT.WR(" or the active listening key ", "DarkGray", "Black");
+            WRT.WR("[", "White", "Black");
+            WRT.WR(Global.VB_LISTENCONTROLKEY, "Green", "Black");
+            WRT.WR("]", "White", "Black");
+            WRT.WRLine(".", "DarkGray", "Black");
+            Keys tmpControlKey = (Keys)char.ToUpper(Global.VB_LISTENCONTROLKEY[0]);
+            bool tmpLoopHandle = true;
+            TI.Hold(300);
+            while (tmpLoopHandle)
+            {
+                if (KeyboardListen.KeyCheck(tmpControlKey) || (KeyboardListen.KeyCheck(Keys.Enter)))
+                {
+                    tmpLoopHandle = false;
+                }
+            }
+         }
         public static void AltInput(string altIn)
         {
             if (altIn.ToLower() == "$credit")
@@ -1183,7 +1510,7 @@ namespace KasTAS
                 GUI.DrawClearBuffer();
                 Console.SetCursorPosition(0, Global.windowH - 3);
                 GUI.DrawLowerBarSpacer();
-                WRT.WR(" KasTAS 1.0.98 (C) 2022 by Owain Horton / Karst Skarn [Owain#3593]", "Green", "Black");
+                WRT.WR(" KasTAS " + Global.version + " (C) 2022 by Owain Horton / Karst Skarn [Owain#3593]", "Green", "Black");
                 Console.ReadKey();
                 GUI.DrawClearBuffer();
                 Console.SetCursorPosition(0, Global.windowH - 3);
@@ -1218,12 +1545,25 @@ namespace KasTAS
                 GUI.DrawClearBuffer();
                 Console.SetCursorPosition(0, Global.windowH - 3);
                 GUI.DrawLowerBarSpacer();
-                WRT.WR(" https://www.twitch.tv/karstskarn", "Green", "Black");
+                WRT.WR(" GitHub Project URL: ", "Green", "Black");
+                WRT.WR("https://github.com/KarstSkarn/KasTAS", "Blue", "Black");
                 Console.ReadKey();
                 GUI.DrawClearBuffer();
                 Console.SetCursorPosition(0, Global.windowH - 3);
                 GUI.DrawLowerBarSpacer();
-                WRT.WR(" Thanks!.", "Green", "Black");
+                WRT.WR(" Special thanks to Miepee ", "Green", "Black");
+                WRT.WR("https://github.com/Miepee", "Blue", "Black");
+                Console.ReadKey();
+                GUI.DrawClearBuffer();
+                Console.SetCursorPosition(0, Global.windowH - 3);
+                GUI.DrawLowerBarSpacer();
+                WRT.WR(" T", "Blue", "Black");
+                WRT.WR("h", "Green", "Black");
+                WRT.WR("a", "Cyan", "Black");
+                WRT.WR("n", "Red", "Black");
+                WRT.WR("k", "Magenta", "Black");
+                WRT.WR("s", "Yellow", "Black");
+                WRT.WR("!.", "White", "Black");
                 Console.ReadKey();
                 Global.tmpUserInput = "NULL";
                 return;
@@ -1248,7 +1588,7 @@ namespace KasTAS
                     Global.lastFileLoaded = userInput;
                     Global.tmpWritePad = "00 LAST FILE    = " + Global.lastFileLoaded;
                     EXF.WriteToCfg(0, Global.tmpWritePad);
-                    Global.KSOAutoScriptExecuteMode = true;
+                    Global.KASScriptExecuteMode = true;
                     EXF.ExecuteKAS();
                 }
             }
@@ -1276,24 +1616,10 @@ namespace KasTAS
                     Global.lastFileLoaded = userInput;
                     Global.tmpWritePad = "00 LAST FILE    = " + Global.lastFileLoaded;
                     EXF.WriteToCfg(0, Global.tmpWritePad);
-                    Global.KSOAutoScriptExecuteMode = true;
+                    Global.KASScriptExecuteMode = true;
                     EXF.ExecuteKAS();
                 }
             }
-            return userInput;
-        }
-        public static string NoReturnStaticPrompt()
-        {
-            GUI.DrawClearBuffer();
-            Console.SetCursorPosition(0, Global.windowH - 3);
-            GUI.DrawLowerBarSpacer();
-            WRT.WR(" ► ", "Cyan", "Black");
-            WRT.WR("Press ", "DarkGray", "Black");
-            WRT.WR("[ENTER]", "White", "Black");
-            WRT.WR(" to continue:", "DarkGray", "Black");
-            WRT.WR(" ", "Cyan", "Black");
-            string userInput = "NULL";
-            System.Console.ReadLine();
             return userInput;
         }
         public static string FileStaticPrompt()
@@ -1316,18 +1642,18 @@ namespace KasTAS
         public static void ChangeTarget()
         {
             GUI.DrawTargetMenu();
-            if (Global.SysConfig == true)
+            if (Global.sysConfig == true)
             {
                 Global.tmpUserInput = EXF.StaticPrompt();
-                if ((Global.tmpUserInput == "1") || (Global.tmpUserInput.ToLower() == "g"))
+                if ((Global.tmpUserInput == "1") || (Global.tmpUserInput.ToLower() == "d"))
                 {
-                    Global.tmpWritePad = "00 SYS TARGET   = GB";
+                    Global.tmpWritePad = "00 SYS TARGET   = DUAL";
                     EXF.WriteToKeyCfg(0, Global.tmpWritePad);
                     return;
                 }
-                if ((Global.tmpUserInput == "2") || (Global.tmpUserInput.ToLower() == "s"))
+                if ((Global.tmpUserInput == "2") || (Global.tmpUserInput.ToLower() == "q"))
                 {
-                    Global.tmpWritePad = "00 SYS TARGET   = SNES";
+                    Global.tmpWritePad = "00 SYS TARGET   = QUAD";
                     EXF.WriteToKeyCfg(0, Global.tmpWritePad);
                     return;
                 }
@@ -1348,7 +1674,7 @@ namespace KasTAS
                 }
                     if ((Global.tmpUserInput == "4") || (Global.tmpUserInput.ToLower() == "e"))
                 {
-                    Global.SysConfig = false;
+                    Global.sysConfig = false;
                     Global.tmpUserInput = "NULL";
                     return;
                 }
@@ -2141,7 +2467,7 @@ namespace KasTAS
         {
             GUI.DrawReadMenu();
             Global.restartArea = false;
-            while (Global.KSOAutoScriptReadMode)
+            while (Global.KASScriptReadMode)
             {
                 if (Global.restartArea == false)
                 {
@@ -2199,37 +2525,38 @@ namespace KasTAS
                             {
                                 // Parse first XX of OpCode.
                                 string tmpSubString = tmpFileData.Substring(0, 2);
-                                Global.tmpKindOfOP = "NULL";
-                                Global.PV_RESW = 9;
-                                Global.PV_GROUP = "NULL";
-                                if (tmpSubString == "PB") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "CO"; }
-                                if (tmpSubString == "RB") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "CO"; }
-                                if (tmpSubString == "JT") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "JT"; }
-                                if (tmpSubString == "SP") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "SP"; }
-                                if (tmpSubString == "RA") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "CO"; }
-                                if (tmpSubString == "JM") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "JU"; }
-                                if (tmpSubString == "HW") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "TI"; }
-                                if (tmpSubString == "RE") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "RE"; }
-                                if (tmpSubString == "EN") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "EN"; }
-                                if (tmpSubString == "FP") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "SP"; }
-                                if (tmpSubString == "TP") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "SP"; }
-                                if (tmpSubString == "KS") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "KS"; }
-                                if (tmpSubString == "SM") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "TI"; }
-                                if (tmpSubString == "CM") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "TI"; }
-                                if (tmpSubString == "SR") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "TI"; }
-                                if (tmpSubString == "SW") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "TI"; }
-                                if (tmpSubString == "DM") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "TI"; }
+                                Global.tmpReadKindOfOP = "NULL";
+                                Global.PV_READGROUP = "NULL";
+                                if (tmpSubString == "PB") { Global.scriptCodeValid = true; Global.tmpReadKindOfOP = "CO"; }
+                                if (tmpSubString == "RB") { Global.scriptCodeValid = true; Global.tmpReadKindOfOP = "CO"; }
+                                if (tmpSubString == "JT") { Global.scriptCodeValid = true; Global.tmpReadKindOfOP = "JT"; }
+                                if (tmpSubString == "SP") { Global.scriptCodeValid = true; Global.tmpReadKindOfOP = "SP"; }
+                                if (tmpSubString == "RA") { Global.scriptCodeValid = true; Global.tmpReadKindOfOP = "CO"; }
+                                if (tmpSubString == "JM") { Global.scriptCodeValid = true; Global.tmpReadKindOfOP = "JU"; }
+                                if (tmpSubString == "HW") { Global.scriptCodeValid = true; Global.tmpReadKindOfOP = "TI"; }
+                                if (tmpSubString == "RE") { Global.scriptCodeValid = true; Global.tmpReadKindOfOP = "RE"; }
+                                if (tmpSubString == "EN") { Global.scriptCodeValid = true; Global.tmpReadKindOfOP = "EN"; }
+                                if (tmpSubString == "FP") { Global.scriptCodeValid = true; Global.tmpReadKindOfOP = "SP"; }
+                                if (tmpSubString == "TP") { Global.scriptCodeValid = true; Global.tmpReadKindOfOP = "SP"; }
+                                if (tmpSubString == "KS") { Global.scriptCodeValid = true; Global.tmpReadKindOfOP = "KS"; }
+                                if (tmpSubString == "SM") { Global.scriptCodeValid = true; Global.tmpReadKindOfOP = "TI"; }
+                                if (tmpSubString == "CM") { Global.scriptCodeValid = true; Global.tmpReadKindOfOP = "TI"; }
+                                if (tmpSubString == "SR") { Global.scriptCodeValid = true; Global.tmpReadKindOfOP = "TI"; }
+                                if (tmpSubString == "SW") { Global.scriptCodeValid = true; Global.tmpReadKindOfOP = "TI"; }
+                                if (tmpSubString == "DM") { Global.scriptCodeValid = true; Global.tmpReadKindOfOP = "TI"; }
+                                if (tmpSubString == "WR") { Global.scriptCodeValid = true; Global.tmpReadKindOfOP = "RM"; }
                                 if (Global.scriptCodeValid == true)
                                 {
                                     // Draw on screen the first half of the OpCode.
-                                    if (Global.tmpKindOfOP == "KS") { WRT.WR(tmpSubString, "Yellow", "Black"); }
-                                    if (Global.tmpKindOfOP == "SP") { WRT.WR(tmpSubString, "Yellow", "Black"); }
-                                    if (Global.tmpKindOfOP == "CO") { WRT.WR(tmpSubString, "Yellow", "Black"); }
-                                    if (Global.tmpKindOfOP == "JU") { WRT.WR(tmpSubString, "Magenta", "Black"); }
-                                    if (Global.tmpKindOfOP == "JT") { WRT.WR(tmpSubString, "Magenta", "Black"); }
-                                    if (Global.tmpKindOfOP == "TI") { WRT.WR(tmpSubString, "Blue", "Black"); }
-                                    if (Global.tmpKindOfOP == "RE") { WRT.WR(tmpSubString, "DarkMagenta", "Black"); }
-                                    if (Global.tmpKindOfOP == "EN") { WRT.WR(tmpSubString, "White", "Blue"); }
+                                    if (Global.tmpReadKindOfOP == "KS") { WRT.WR(tmpSubString, "Yellow", "Black"); }
+                                    if (Global.tmpReadKindOfOP == "SP") { WRT.WR(tmpSubString, "Yellow", "Black"); }
+                                    if (Global.tmpReadKindOfOP == "CO") { WRT.WR(tmpSubString, "Yellow", "Black"); }
+                                    if (Global.tmpReadKindOfOP == "JU") { WRT.WR(tmpSubString, "Magenta", "Black"); }
+                                    if (Global.tmpReadKindOfOP == "JT") { WRT.WR(tmpSubString, "Magenta", "Black"); }
+                                    if (Global.tmpReadKindOfOP == "TI") { WRT.WR(tmpSubString, "Blue", "Black"); }
+                                    if (Global.tmpReadKindOfOP == "RE") { WRT.WR(tmpSubString, "DarkMagenta", "Black"); }
+                                    if (Global.tmpReadKindOfOP == "EN") { WRT.WR(tmpSubString, "White", "Blue"); }
+                                    if (Global.tmpReadKindOfOP == "RM") { WRT.WR(tmpSubString, "Cyan", "DarkMagenta"); }
                                 }
                                 else
                                 {
@@ -2239,21 +2566,21 @@ namespace KasTAS
                                     tmpSubString = tmpFileData.Substring(2, tmpLateSubstring);
                                     WRT.WR(tmpSubString, "Red", "Black");
                                 }
-                                if (Global.tmpKindOfOP == "KS")
+                                if (Global.tmpReadKindOfOP == "KS")
                                 {
                                     // OpCode is a Key String.
                                     int tmpLateSubstring = tmpFileData.Length - 2;
                                     tmpSubString = tmpFileData.Substring(2, tmpLateSubstring);
                                     WRT.WR(tmpSubString, "DarkGreen", "Black");
                                 }
-                                if (Global.tmpKindOfOP == "EN")
+                                if (Global.tmpReadKindOfOP == "EN")
                                 {
                                     // OpCode is an end OpCode.
                                     int tmpLateSubstring = tmpFileData.Length - 2;
                                     tmpSubString = tmpFileData.Substring(2, tmpLateSubstring);
                                     WRT.WR(tmpSubString, "DarkMagenta", "Black");
                                 }
-                                if (Global.tmpKindOfOP == "RE")
+                                if (Global.tmpReadKindOfOP == "RE")
                                 {
                                     // OpCode is a Script Commentary/Rem.
                                     int tmpLateSubstring = tmpFileData.Length - 2;
@@ -2261,7 +2588,7 @@ namespace KasTAS
                                     WRT.WR(tmpSubString, "DarkMagenta", "Black");
                                 }
                                 // Parse next 2 XX YY of the OpCode
-                                if ((tmpFileData.Length >= 5) && (Global.tmpKindOfOP != "RE"))
+                                if ((tmpFileData.Length >= 5) && (Global.tmpReadKindOfOP != "RE"))
                                 {
                                     tmpSubString = tmpFileData.Substring(2, 1);
                                     if (tmpSubString == " ")
@@ -2273,7 +2600,7 @@ namespace KasTAS
                                         Global.tmpReadErrorFound++;
                                         WRT.WR(tmpSubString, "White", "Red");
                                     }
-                                    if ((Global.tmpKindOfOP == "CO") || (Global.tmpKindOfOP == "SP"))
+                                    if ((Global.tmpReadKindOfOP == "CO") || (Global.tmpReadKindOfOP == "SP"))
                                     {
                                         // OpCode is a button control OpCode.
                                         Global.scriptCodeValid = false;
@@ -2286,26 +2613,20 @@ namespace KasTAS
                                         if (tmpSubString == "DO") { Global.scriptCodeValid = true; }
                                         if (tmpSubString == "LE") { Global.scriptCodeValid = true; }
                                         if (tmpSubString == "RI") { Global.scriptCodeValid = true; }
-                                        if (Global.SysTarget == "SNES")
-                                        {
-                                            if (tmpSubString == "XX") { Global.scriptCodeValid = true; }
-                                            if (tmpSubString == "YY") { Global.scriptCodeValid = true; }
-                                            if (tmpSubString == "BL") { Global.scriptCodeValid = true; }
-                                            if (tmpSubString == "BR") { Global.scriptCodeValid = true; }
-                                        }
-                                        if (Global.flagExtMode == "true")
-                                        {
-                                            if (Global.tmpSubstring == "E0") { Global.scriptCodeValid = true; }
-                                            if (Global.tmpSubstring == "E1") { Global.scriptCodeValid = true; }
-                                            if (Global.tmpSubstring == "E2") { Global.scriptCodeValid = true; }
-                                            if (Global.tmpSubstring == "E3") { Global.scriptCodeValid = true; }
-                                            if (Global.tmpSubstring == "E4") { Global.scriptCodeValid = true; }
-                                            if (Global.tmpSubstring == "E5") { Global.scriptCodeValid = true; }
-                                            if (Global.tmpSubstring == "E6") { Global.scriptCodeValid = true; }
-                                            if (Global.tmpSubstring == "E7") { Global.scriptCodeValid = true; }
-                                            if (Global.tmpSubstring == "E8") { Global.scriptCodeValid = true; }
-                                            if (Global.tmpSubstring == "E9") { Global.scriptCodeValid = true; }
-                                        }
+                                        if (tmpSubString == "XX") { Global.scriptCodeValid = true; }
+                                        if (tmpSubString == "YY") { Global.scriptCodeValid = true; }
+                                        if (tmpSubString == "BL") { Global.scriptCodeValid = true; }
+                                        if (tmpSubString == "BR") { Global.scriptCodeValid = true; }
+                                        if (tmpSubString == "E0") { Global.scriptCodeValid = true; }
+                                        if (tmpSubString == "E1") { Global.scriptCodeValid = true; }
+                                        if (tmpSubString == "E2") { Global.scriptCodeValid = true; }
+                                        if (tmpSubString == "E3") { Global.scriptCodeValid = true; }
+                                        if (tmpSubString == "E4") { Global.scriptCodeValid = true; }
+                                        if (tmpSubString == "E5") { Global.scriptCodeValid = true; }
+                                        if (tmpSubString == "E6") { Global.scriptCodeValid = true; }
+                                        if (tmpSubString == "E7") { Global.scriptCodeValid = true; }
+                                        if (tmpSubString == "E8") { Global.scriptCodeValid = true; }
+                                        if (tmpSubString == "E9") { Global.scriptCodeValid = true; }
                                         if (Global.scriptCodeValid == true)
                                         {
                                             WRT.WR(tmpSubString, "Green", "Black");
@@ -2317,14 +2638,14 @@ namespace KasTAS
                                         }
                                         if (tmpFileData.Length >= 5)
                                         {
-                                            if (Global.tmpKindOfOP == "CO")
+                                            if (Global.tmpReadKindOfOP == "CO")
                                             {
                                                 // Error: A CO type OpCode shouldn't have more characters.
                                                 int tmpLateSubstring = tmpFileData.Length - 5;
                                                 tmpSubString = tmpFileData.Substring(5, tmpLateSubstring);
                                                 WRT.WR(tmpSubString, "Red", "Black");
                                             }
-                                            if (Global.tmpKindOfOP == "SP")
+                                            if (Global.tmpReadKindOfOP == "SP")
                                             {
                                                 // Get SoftPush OpCode time value.
                                                 int tmpLateSubstring = tmpFileData.Length - 5;
@@ -2333,21 +2654,21 @@ namespace KasTAS
                                             }
                                         }
                                     }
-                                    else if (Global.tmpKindOfOP == "JU")
+                                    else if (Global.tmpReadKindOfOP == "JU")
                                     {
                                         // OpCode is a Jump OpCode.
                                         int tmpLateSubstring = tmpFileData.Length - 3;
                                         tmpSubString = tmpFileData.Substring(3, tmpLateSubstring);
                                         WRT.WR(tmpSubString, "White", "Black");
                                     }
-                                    else if (Global.tmpKindOfOP == "TI")
+                                    else if (Global.tmpReadKindOfOP == "TI")
                                     {
                                         // OpCode is a Time/Wait OpCode.
                                         int tmpLateSubstring = tmpFileData.Length - 3;
                                         tmpSubString = tmpFileData.Substring(3, tmpLateSubstring);
                                         WRT.WR(tmpSubString, "Cyan", "Black");
                                     }
-                                    else if (Global.tmpKindOfOP == "JT")
+                                    else if (Global.tmpReadKindOfOP == "JT")
                                     {
                                         // OpCode is a Jump X Times OpCode.
                                         // Get how many times it will repeat (Max = 99).
@@ -2371,10 +2692,10 @@ namespace KasTAS
                                         }
                                     }
                                 }
-                                else if ((tmpFileData.Length >= 3) && (tmpFileData.Length <= 5) && (Global.tmpKindOfOP != "RE"))
+                                else if ((tmpFileData.Length >= 3) && (tmpFileData.Length <= 5) && (Global.tmpReadKindOfOP != "RE"))
                                 {
                                     // Special case for small value OpCodes.
-                                    if (Global.tmpKindOfOP == "JU")
+                                    if (Global.tmpReadKindOfOP == "JU")
                                     {
                                         // OpCode is a Jump OpCode.
                                         int tmpLateSubstring = tmpFileData.Length - 3;
@@ -2382,7 +2703,7 @@ namespace KasTAS
                                         WRT.WR(" ", "White", "Black");
                                         WRT.WR(tmpSubString, "White", "Black");
                                     }
-                                    else if (Global.tmpKindOfOP == "TI")
+                                    else if (Global.tmpReadKindOfOP == "TI")
                                     {
                                         // OpCode is a Time/Wait OpCode.
                                         int tmpLateSubstring = tmpFileData.Length - 3;
@@ -2390,7 +2711,7 @@ namespace KasTAS
                                         WRT.WR(" ", "White", "Black");
                                         WRT.WR(tmpSubString, "Cyan", "Black");
                                     }
-                                    else if (Global.tmpKindOfOP == "JT")
+                                    else if (Global.tmpReadKindOfOP == "JT")
                                     {
                                         // OpCode is a Jump X Times OpCode.
                                         // Get how many times it will repeat (Max = 99).
@@ -2461,10 +2782,10 @@ namespace KasTAS
                 }
                 if ((Global.tmpUserInput == "2") || (Global.tmpUserInput.ToLower() == "e"))
                 {
-                    Global.KSOAutoScriptReadMode = false;
+                    Global.KASScriptReadMode = false;
                     Global.tmpUserInput = "NULL";
                     return;
-                    WRT.WR(" Leaving Read Menu...", "White", "Black");
+                    // WRT.WR(" Leaving Read Menu...", "White", "Black");
                 }
             } // Active While End   
         }
@@ -2472,7 +2793,7 @@ namespace KasTAS
         {
             GUI.DrawExecuteMenu();
             Global.restartArea = false;
-            while (Global.KSOAutoScriptExecuteMode)
+            while (Global.KASScriptExecuteMode)
             {
                 if (Global.restartArea == false)
                 {
@@ -2502,7 +2823,7 @@ namespace KasTAS
                     int tmpFileSize = File.ReadLines(Global.scriptsDirectory + Global.tmpUserInput).Count();
                     long tmpFileWeight = scriptFileInfo.Length;
                     GUI.DrawTitle();
-                    GUI.DrawSubtitle("KSOAutoScript Execution");
+                    GUI.DrawSubtitle("KAS Script Execution");
                     GUI.DrawSpacer();
                     WRT.WR(" Filename: ", "White", "Black");
                     WRT.WRLine(Convert.ToString(Global.tmpUserInput), "Cyan", "Black");
@@ -2512,8 +2833,9 @@ namespace KasTAS
                     WRT.WR(Convert.ToString(tmpFileWeight), "Green", "Black");
                     WRT.WRLine(" Bytes", "DarkGray", "Black");
                     GUI.DrawSpacer();
-                    EXF.ExecutionHalt();
+                    EXF.RemoteExecutionHalt();
                     Console.CursorVisible = false;
+                    Keys tmpExecutionKey = (Keys)char.ToUpper(Global.VB_LISTENEXECUTIONKEY[0]);
                     GC.Collect();
                     GUI.FormatConsoleExpBuffer();
                     GUI.DrawTitle();
@@ -2546,7 +2868,7 @@ namespace KasTAS
                         Global.tmpLineTotal = 0;
                         while (Global.tmpLineCursor <= tmpFileSize)
                         {
-                            Global.scriptCodeValid = false;
+                            Global.scriptCodeValid = true;
                             string tmpLineNumber = Convert.ToString(Global.tmpLineCursor);
                             tmpLineNumber = tmpLineNumber.PadLeft(8, Global.charZero);
                             WRT.WR(" " + tmpLineNumber, "White", "Black");
@@ -2572,38 +2894,80 @@ namespace KasTAS
                                 }
                                 // Parse first XX of OpCode.
                                 Global.tmpSubstring = Global.tmpFileData.Substring(0, 2);
-                                Global.tmpKindOfOP = "NULL";
-                                Global.PV_RESW = 9;
-                                Global.PV_GROUP = "NULL";
+                                Global.tmpKindOfOP = OP_States.None;
+                                Global.PV_GROUP = PV_GROUPStates.None;
                                 Global.tmpOPCache = "NULL";
-                                if (Global.tmpSubstring == "PB") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "CO"; }
-                                if (Global.tmpSubstring == "RB") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "CO"; }
-                                if (Global.tmpSubstring == "JT") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "JT"; }
-                                if (Global.tmpSubstring == "SP") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "SP"; }
-                                if (Global.tmpSubstring == "RA") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "CO"; }
-                                if (Global.tmpSubstring == "JM") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "JU"; }
-                                if (Global.tmpSubstring == "HW") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "TI"; }
-                                if (Global.tmpSubstring == "RE") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "RE"; }
-                                if (Global.tmpSubstring == "EN") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "EN"; }
-                                if (Global.tmpSubstring == "FP") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "SP"; }
-                                if (Global.tmpSubstring == "TP") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "SP"; }
-                                if (Global.tmpSubstring == "KS") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "KS"; }
-                                if (Global.tmpSubstring == "SW") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "TI"; }
-                                if (Global.tmpSubstring == "SR") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "TI"; }
-                                if (Global.tmpSubstring == "SM") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "TI"; }
-                                if (Global.tmpSubstring == "CM") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "TI"; }
-                                if (Global.tmpSubstring == "DM") { Global.scriptCodeValid = true; Global.tmpKindOfOP = "TI"; }
-                                if (Global.scriptCodeValid == true)
+                                switch (Global.tmpSubstring)
+                                {
+                                    case "PB":
+                                    case "RB":
+                                    case "RA":
+                                        Global.tmpKindOfOP = OP_States.CO;
+                                        break;
+                                    case "JT":
+                                        Global.tmpKindOfOP = OP_States.JT;
+                                        break;
+                                    case "SP":
+                                    case "FP":
+                                    case "TP":
+                                        Global.tmpKindOfOP = OP_States.SP;
+                                        break;
+                                    case "JM":
+                                        Global.tmpKindOfOP = OP_States.JU;
+                                        break;
+                                    case "HW":
+                                    case "SW":
+                                    case "SR":
+                                    case "SM":
+                                    case "CM":
+                                    case "DM":
+                                        Global.tmpKindOfOP = OP_States.TI;
+                                        break;
+                                    case "RE":
+                                        Global.tmpKindOfOP = OP_States.RE;
+                                        break;
+                                    case "EN":
+                                        Global.tmpKindOfOP = OP_States.EN;
+                                        break;
+                                    case "KS":
+                                        Global.tmpKindOfOP = OP_States.KS;
+                                        break;
+                                    case "WR":
+                                        Global.tmpKindOfOP = OP_States.RM;
+                                        break;
+
+                                    default:
+                                        Global.scriptCodeValid = false;
+                                        break;
+                                }
+
+                                if (Global.scriptCodeValid)
                                 {
                                     // Draw on screen the first half of the OpCode.
-                                    if (Global.tmpKindOfOP == "SP") { WRT.WR(Global.tmpSubstring, "Yellow", "Black"); }
-                                    if (Global.tmpKindOfOP == "CO") { WRT.WR(Global.tmpSubstring, "Yellow", "Black"); }
-                                    if (Global.tmpKindOfOP == "KS") { WRT.WR(Global.tmpSubstring, "Yellow", "Black"); }
-                                    if (Global.tmpKindOfOP == "JU") { WRT.WR(Global.tmpSubstring, "Magenta", "Black"); }
-                                    if (Global.tmpKindOfOP == "JT") { WRT.WR(Global.tmpSubstring, "Magenta", "Black"); }
-                                    if (Global.tmpKindOfOP == "TI") { WRT.WR(Global.tmpSubstring, "Blue", "Black"); }
-                                    if (Global.tmpKindOfOP == "RE") { WRT.WR(Global.tmpSubstring, "DarkMagenta", "Black"); }
-                                    if (Global.tmpKindOfOP == "EN") { WRT.WR(Global.tmpSubstring, "White", "Blue"); }
+                                    switch (Global.tmpKindOfOP)
+                                    {
+                                        case OP_States.SP:
+                                        case OP_States.CO:
+                                        case OP_States.KS:
+                                            WRT.WR(Global.tmpSubstring, "Yellow", "Black");
+                                            break;
+                                        case OP_States.JU:
+                                        case OP_States.JT:
+                                            WRT.WR(Global.tmpSubstring, "Magenta", "Black");
+                                            break;
+                                        case OP_States.TI:
+                                            WRT.WR(Global.tmpSubstring, "Blue", "Black");
+                                            break;
+                                        case OP_States.RE:
+                                            WRT.WR(Global.tmpSubstring, "DarkMagenta", "Black");
+                                            break;
+                                        case OP_States.EN:
+                                            WRT.WR(Global.tmpSubstring, "White", "Blue");
+                                            break;
+                                        case OP_States.RM:
+                                            WRT.WR(Global.tmpSubstring, "Cyan", "DarkMagenta");
+                                            break;
+                                    }
                                     // Save the OP type for further use
                                     Global.tmpOPCache = Global.tmpSubstring;
                                 }
@@ -2615,27 +2979,35 @@ namespace KasTAS
                                     WRT.WR(Global.tmpSubstring, "Red", "Black");
                                 }
                                 // Small OPCodes Special Identification Area
-                                if (Global.tmpKindOfOP == "KS")
+                                switch (Global.tmpKindOfOP)
                                 {
                                     // OpCode is a Special Key String.
-                                    int tmpLateSubstring = Global.tmpFileData.Length - 2;
-                                    Global.tmpSubstring = Global.tmpFileData.Substring(2, tmpLateSubstring);
-                                    Global.tmpOPValueCache = Global.tmpSubstring;
-                                    WRT.WR(Global.tmpSubstring, "DarkGreen", "Black");
-                                }
-                                if (Global.tmpKindOfOP == "RE")
-                                {
+                                    case OP_States.KS:
+                                        {
+                                            int tmpLateSubstring = Global.tmpFileData.Length - 2;
+                                            Global.tmpSubstring = Global.tmpFileData.Substring(2, tmpLateSubstring);
+                                            Global.tmpOPValueCache = Global.tmpSubstring;
+                                            WRT.WR(Global.tmpSubstring, "DarkGreen", "Black");
+                                            break;
+                                        }
                                     // OpCode is a Script Commentary/Rem.
-                                    int tmpLateSubstring = Global.tmpFileData.Length - 2;
-                                    Global.tmpSubstring = Global.tmpFileData.Substring(2, tmpLateSubstring);
-                                    WRT.WR(Global.tmpSubstring, "DarkMagenta", "Black");
-                                }
-                                if (Global.tmpKindOfOP == "EN")
-                                {
+                                    case OP_States.RE:
+                                        {
+                                            // OpCode is a Script Commentary/Rem.
+                                            int tmpLateSubstring = Global.tmpFileData.Length - 2;
+                                            Global.tmpSubstring = Global.tmpFileData.Substring(2, tmpLateSubstring);
+                                            WRT.WR(Global.tmpSubstring, "DarkMagenta", "Black");
+                                            break;
+                                        }
                                     // OpCode is an end OpCode.
-                                    int tmpLateSubstring = Global.tmpFileData.Length - 2;
-                                    Global.tmpSubstring = Global.tmpFileData.Substring(2, tmpLateSubstring);
-                                    WRT.WR(Global.tmpSubstring, "DarkMagenta", "Black");
+                                    case OP_States.EN:
+                                        {
+                                            // OpCode is an end OpCode.
+                                            int tmpLateSubstring = Global.tmpFileData.Length - 2;
+                                            Global.tmpSubstring = Global.tmpFileData.Substring(2, tmpLateSubstring);
+                                            WRT.WR(Global.tmpSubstring, "DarkMagenta", "Black");
+                                            break;
+                                        }
                                 }
                                 // Small OpCodes Special Drawing
                                 if (Global.tmpFileData.Length <= 3)
@@ -2645,7 +3017,7 @@ namespace KasTAS
                                     WRT.WR(Global.tmpSubstring, "Red", "Black");
                                 }
                                 // Parse next 2 XX YY of the OpCode
-                                if ((Global.tmpFileData.Length >= 5) && (Global.tmpKindOfOP != "RE") && (Global.tmpKindOfOP != "KS"))
+                                if ((Global.tmpFileData.Length >= 5) && (Global.tmpKindOfOP != OP_States.RE) && (Global.tmpKindOfOP != OP_States.KS))
                                 {
                                     Global.tmpSubstring = Global.tmpFileData.Substring(2, 1);
                                     if (Global.tmpSubstring == " ")
@@ -2658,40 +3030,115 @@ namespace KasTAS
                                         WRT.WR(Global.tmpSubstring, "White", "Red");
                                     }
                                     // Read the buttons and draw them in Control OpCodes.
-                                    if ((Global.tmpKindOfOP == "CO") || (Global.tmpKindOfOP == "SP"))
+                                    if ((Global.tmpKindOfOP == OP_States.CO) || (Global.tmpKindOfOP == OP_States.SP))
                                     {
                                         // OpCode is a button control OpCode.
                                         Global.scriptCodeValid = false;
                                         Global.tmpSubstring = Global.tmpFileData.Substring(3, 2);
-                                        if (Global.tmpSubstring == "AA") { Global.scriptCodeValid = true; Global.PV_GROUP = "A"; }
-                                        if (Global.tmpSubstring == "BB") { Global.scriptCodeValid = true; Global.PV_GROUP = "B"; }
-                                        if (Global.tmpSubstring == "ST") { Global.scriptCodeValid = true; Global.PV_GROUP = "ST"; }
-                                        if (Global.tmpSubstring == "SE") { Global.scriptCodeValid = true; Global.PV_GROUP = "SE"; }
-                                        if (Global.tmpSubstring == "UP") { Global.scriptCodeValid = true; Global.PV_GROUP = "UP"; }
-                                        if (Global.tmpSubstring == "DO") { Global.scriptCodeValid = true; Global.PV_GROUP = "DO"; }
-                                        if (Global.tmpSubstring == "LE") { Global.scriptCodeValid = true; Global.PV_GROUP = "LE"; }
-                                        if (Global.tmpSubstring == "RI") { Global.scriptCodeValid = true; Global.PV_GROUP = "RI"; }
-                                        if (Global.SysTarget == "SNES")
+                                        switch (Global.tmpSubstring)
                                         {
-                                            if (Global.tmpSubstring == "XX") { Global.scriptCodeValid = true; Global.PV_GROUP = "XX"; }
-                                            if (Global.tmpSubstring == "YY") { Global.scriptCodeValid = true; Global.PV_GROUP = "YY"; }
-                                            if (Global.tmpSubstring == "BL") { Global.scriptCodeValid = true; Global.PV_GROUP = "BL"; }
-                                            if (Global.tmpSubstring == "BR") { Global.scriptCodeValid = true; Global.PV_GROUP = "BR"; }
+                                            case "AA":
+                                                Global.scriptCodeValid = true;
+                                                Global.PV_GROUP = PV_GROUPStates.AA;
+                                                break;
+                                            case "BB":
+                                                Global.scriptCodeValid = true;
+                                                Global.PV_GROUP = PV_GROUPStates.BB;
+                                                break;
+                                            case "ST":
+                                                Global.scriptCodeValid = true;
+                                                Global.PV_GROUP = PV_GROUPStates.ST;
+                                                break;
+                                            case "SE":
+                                                Global.scriptCodeValid = true;
+                                                Global.PV_GROUP = PV_GROUPStates.SE;
+                                                break;
+                                            case "UP":
+                                                Global.scriptCodeValid = true;
+                                                Global.PV_GROUP = PV_GROUPStates.UP;
+                                                break;
+                                            case "DO":
+                                                Global.scriptCodeValid = true;
+                                                Global.PV_GROUP = PV_GROUPStates.DO;
+                                                break;
+                                            case "LE":
+                                                Global.scriptCodeValid = true;
+                                                Global.PV_GROUP = PV_GROUPStates.LE;
+                                                break;
+                                            case "RI":
+                                                Global.scriptCodeValid = true;
+                                                Global.PV_GROUP = PV_GROUPStates.RI;
+                                                break;
+                                        }
+                                        if (Global.sysTarget == "QUAD")
+                                        {
+                                            switch (Global.tmpSubstring)
+                                            {
+                                                case "XX":
+                                                    Global.scriptCodeValid = true;
+                                                    Global.PV_GROUP = PV_GROUPStates.XX;
+                                                    break;
+                                                case "YY":
+                                                    Global.scriptCodeValid = true;
+                                                    Global.PV_GROUP = PV_GROUPStates.YY;
+                                                    break;
+                                                case "BL":
+                                                    Global.scriptCodeValid = true;
+                                                    Global.PV_GROUP = PV_GROUPStates.BL;
+                                                    break;
+                                                case "BR":
+                                                    Global.scriptCodeValid = true;
+                                                    Global.PV_GROUP = PV_GROUPStates.BR;
+                                                    break;
+                                            }
                                         }
                                         if (Global.flagExtMode == "true")
                                         {
-                                            if (Global.tmpSubstring == "E0") { Global.scriptCodeValid = true; Global.PV_GROUP = "E0"; }
-                                            if (Global.tmpSubstring == "E1") { Global.scriptCodeValid = true; Global.PV_GROUP = "E1"; }
-                                            if (Global.tmpSubstring == "E2") { Global.scriptCodeValid = true; Global.PV_GROUP = "E2"; }
-                                            if (Global.tmpSubstring == "E3") { Global.scriptCodeValid = true; Global.PV_GROUP = "E3"; }
-                                            if (Global.tmpSubstring == "E4") { Global.scriptCodeValid = true; Global.PV_GROUP = "E4"; }
-                                            if (Global.tmpSubstring == "E5") { Global.scriptCodeValid = true; Global.PV_GROUP = "E5"; }
-                                            if (Global.tmpSubstring == "E6") { Global.scriptCodeValid = true; Global.PV_GROUP = "E6"; }
-                                            if (Global.tmpSubstring == "E7") { Global.scriptCodeValid = true; Global.PV_GROUP = "E7"; }
-                                            if (Global.tmpSubstring == "E8") { Global.scriptCodeValid = true; Global.PV_GROUP = "E8"; }
-                                            if (Global.tmpSubstring == "E9") { Global.scriptCodeValid = true; Global.PV_GROUP = "E9"; }
+                                            switch (Global.tmpSubstring)
+                                            {
+                                                case "E0":
+                                                    Global.scriptCodeValid = true;
+                                                    Global.PV_GROUP = PV_GROUPStates.E0;
+                                                    break;
+                                                case "E1":
+                                                    Global.scriptCodeValid = true;
+                                                    Global.PV_GROUP = PV_GROUPStates.E1;
+                                                    break;
+                                                case "E2":
+                                                    Global.scriptCodeValid = true;
+                                                    Global.PV_GROUP = PV_GROUPStates.E2;
+                                                    break;
+                                                case "E3":
+                                                    Global.scriptCodeValid = true;
+                                                    Global.PV_GROUP = PV_GROUPStates.E3;
+                                                    break;
+                                                case "E4":
+                                                    Global.scriptCodeValid = true;
+                                                    Global.PV_GROUP = PV_GROUPStates.E4;
+                                                    break;
+                                                case "E5":
+                                                    Global.scriptCodeValid = true;
+                                                    Global.PV_GROUP = PV_GROUPStates.E5;
+                                                    break;
+                                                case "E6":
+                                                    Global.scriptCodeValid = true;
+                                                    Global.PV_GROUP = PV_GROUPStates.E6;
+                                                    break;
+                                                case "E7":
+                                                    Global.scriptCodeValid = true;
+                                                    Global.PV_GROUP = PV_GROUPStates.E7;
+                                                    break;
+                                                case "E8":
+                                                    Global.scriptCodeValid = true;
+                                                    Global.PV_GROUP = PV_GROUPStates.E8;
+                                                    break;
+                                                case "E9":
+                                                    Global.scriptCodeValid = true;
+                                                    Global.PV_GROUP = PV_GROUPStates.E9;
+                                                    break;
+                                            }
                                         }
-                                        if (Global.scriptCodeValid == true)
+                                        if (Global.scriptCodeValid)
                                         {
                                             WRT.WR(Global.tmpSubstring, "Green", "Black");
                                         }
@@ -2704,14 +3151,14 @@ namespace KasTAS
                                         // Draw the rest of an OpCode if is bigger than 5 spaces.
                                         if (Global.tmpFileData.Length >= 5)
                                         {
-                                            if (Global.tmpKindOfOP == "CO")
+                                            if (Global.tmpKindOfOP == OP_States.CO)
                                             {
                                                 // Error: A CO type OpCode shouldn't have more characters.
                                                 int tmpLateSubstring = Global.tmpFileData.Length - 5;
                                                 Global.tmpSubstring = Global.tmpFileData.Substring(5, tmpLateSubstring);
                                                 WRT.WR(Global.tmpSubstring, "Red", "Black");
                                             }
-                                            if (Global.tmpKindOfOP == "SP")
+                                            if (Global.tmpKindOfOP == OP_States.SP)
                                             {
                                                 // Get SoftPush OpCode time value.
                                                 WRT.WR(" ", "White", "Black");
@@ -2723,7 +3170,7 @@ namespace KasTAS
                                             }
                                         }
                                     }
-                                    else if (Global.tmpKindOfOP == "JU")
+                                    else if (Global.tmpKindOfOP == OP_States.JU)
                                     {
                                         // OpCode is a Jump OpCode.
                                         int tmpLateSubstring = Global.tmpFileData.Length - 3;
@@ -2731,7 +3178,7 @@ namespace KasTAS
                                         Global.tmpOPValueCache = Global.tmpSubstring;
                                         WRT.WR(Global.tmpSubstring, "White", "Black");
                                     }
-                                    else if (Global.tmpKindOfOP == "TI")
+                                    else if (Global.tmpKindOfOP == OP_States.TI)
                                     {
                                         // OpCode is a Time/Wait OpCode.
                                         int tmpLateSubstring = Global.tmpFileData.Length - 3;
@@ -2739,7 +3186,7 @@ namespace KasTAS
                                         Global.tmpOPValueCache = Global.tmpSubstring;
                                         WRT.WR(Global.tmpSubstring, "Cyan", "Black");
                                     }
-                                    else if (Global.tmpKindOfOP == "JT")
+                                    else if (Global.tmpKindOfOP == OP_States.JT)
                                     {
                                         // OpCode is a Jump X Times OpCode.
                                         // Get how many times it will repeat (Max = 99).
@@ -2767,54 +3214,60 @@ namespace KasTAS
                                         }
                                     }
                                 }
-                                else if (((Global.tmpFileData.Length > 3) && (Global.tmpFileData.Length < 5)) && (Global.tmpKindOfOP != "RE"))
+                                else if (((Global.tmpFileData.Length > 3) && (Global.tmpFileData.Length < 5)) && (Global.tmpKindOfOP != OP_States.RE))
                                 {
-                                    // Special case for small value OpCodes.
-                                    if (Global.tmpKindOfOP == "JU")
+                                    // Special case for small value OpCodes
+                                    switch (Global.tmpKindOfOP)
                                     {
-                                        // OpCode is a Jump OpCode.
-                                        int tmpLateSubstring = Global.tmpFileData.Length - 3;
-                                        Global.tmpSubstring = Global.tmpFileData.Substring(3, tmpLateSubstring);
-                                        Global.tmpOPValueCache = Global.tmpSubstring;
-                                        WRT.WR(" ", "White", "Black");
-                                        WRT.WR(Global.tmpSubstring, "White", "Black");
-                                    }
-                                    else if (Global.tmpKindOfOP == "TI")
-                                    {
-                                        // OpCode is a Time/Wait OpCode.
-                                        int tmpLateSubstring = Global.tmpFileData.Length - 3;
-                                        Global.tmpSubstring = Global.tmpFileData.Substring(3, tmpLateSubstring);
-                                        Global.tmpOPValueCache = Global.tmpSubstring;
-                                        WRT.WR(" ", "White", "Black");
-                                        WRT.WR(Global.tmpSubstring, "Cyan", "Black");
-                                    }
-                                    else if (Global.tmpKindOfOP == "JT")
-                                    {
-                                        // OpCode is a Jump X Times OpCode.
-                                        // Get how many times it will repeat (Max = 99).
-                                        Global.tmpSubstring = Global.tmpFileData.Substring(3, 2);
-                                        WRT.WR(" ", "White", "Black");
-                                        WRT.WR(Global.tmpSubstring, "DarkCyan", "Black");
-                                        Global.tmpOPValueCache = Global.tmpSubstring;
-                                        Global.tmpSubstring = Global.tmpFileData.Substring(5, 1);
-                                        if (Global.tmpSubstring == " ")
-                                        {
-                                            // Is a valid JT OpCode. Draw line on screen.
-                                            WRT.WR(" ", "White", "Black");
-                                            int tmpLateSubstring = Global.tmpFileData.Length - 6;
-                                            Global.tmpSubstring = Global.tmpFileData.Substring(6, tmpLateSubstring);
-                                            Global.tmpOPAuxValueCache = Global.tmpSubstring;
-                                            WRT.WR(Global.tmpSubstring, "White", "Black");
-                                        }
-                                        else
-                                        {
-                                            // Error: Format error on JT OpCode.
-                                            WRT.WR(" ", "White", "Black");
-                                            int tmpLateSubstring = Global.tmpFileData.Length - 6;
-                                            Global.tmpSubstring = Global.tmpFileData.Substring(6, tmpLateSubstring);
-                                            Global.tmpOPAuxValueCache = Global.tmpSubstring;
-                                            WRT.WR(Global.tmpSubstring, "Red", "Black");
-                                        }
+                                        case OP_States.JU:
+                                            {
+                                                // OpCode is a Jump OpCode.
+                                                int tmpLateSubstring = Global.tmpFileData.Length - 3;
+                                                Global.tmpSubstring = Global.tmpFileData.Substring(3, tmpLateSubstring);
+                                                Global.tmpOPValueCache = Global.tmpSubstring;
+                                                WRT.WR(" ", "White", "Black");
+                                                WRT.WR(Global.tmpSubstring, "White", "Black");
+                                                break;
+                                            }
+                                        case OP_States.TI:
+                                            {
+                                                // OpCode is a Time/Wait OpCode.
+                                                int tmpLateSubstring = Global.tmpFileData.Length - 3;
+                                                Global.tmpSubstring = Global.tmpFileData.Substring(3, tmpLateSubstring);
+                                                Global.tmpOPValueCache = Global.tmpSubstring;
+                                                WRT.WR(" ", "White", "Black");
+                                                WRT.WR(Global.tmpSubstring, "Cyan", "Black");
+                                                break;
+                                            }
+                                        case OP_States.JT:
+                                            {
+                                                // OpCode is a Jump X Times OpCode.
+                                                // Get how many times it will repeat (Max = 99).
+                                                Global.tmpSubstring = Global.tmpFileData.Substring(3, 2);
+                                                WRT.WR(" ", "White", "Black");
+                                                WRT.WR(Global.tmpSubstring, "DarkCyan", "Black");
+                                                Global.tmpOPValueCache = Global.tmpSubstring;
+                                                Global.tmpSubstring = Global.tmpFileData.Substring(5, 1);
+                                                if (Global.tmpSubstring == " ")
+                                                {
+                                                    // Is a valid JT OpCode. Draw line on screen.
+                                                    WRT.WR(" ", "White", "Black");
+                                                    int tmpLateSubstring = Global.tmpFileData.Length - 6;
+                                                    Global.tmpSubstring = Global.tmpFileData.Substring(6, tmpLateSubstring);
+                                                    Global.tmpOPAuxValueCache = Global.tmpSubstring;
+                                                    WRT.WR(Global.tmpSubstring, "White", "Black");
+                                                }
+                                                else
+                                                {
+                                                    // Error: Format error on JT OpCode.
+                                                    WRT.WR(" ", "White", "Black");
+                                                    int tmpLateSubstring = Global.tmpFileData.Length - 6;
+                                                    Global.tmpSubstring = Global.tmpFileData.Substring(6, tmpLateSubstring);
+                                                    Global.tmpOPAuxValueCache = Global.tmpSubstring;
+                                                    WRT.WR(Global.tmpSubstring, "Red", "Black");
+                                                }
+                                                break;
+                                            }
                                     }
                                 }
                             }
@@ -2823,859 +3276,225 @@ namespace KasTAS
                             Global.tmpWritePad = (Global.tmpWritePad).PadLeft((31 - Global.tmpFileData.Length), Global.charSpace);
                             WRT.WR(Global.tmpWritePad, "DarkMagenta", "Black");
                             // Execute readed OpCodes.
-                            // PB - Push Button.
-                            if (Global.tmpOPCache == "PB")
+                            switch (Global.tmpOPCache)
                             {
-                                if (Global.PV_GROUP == "A")
-                                {
-                                    VK.VK_Down(Global.VB_A);
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "B")
-                                {
-                                    VK.VK_Down(Global.VB_B);
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "ST")
-                                {
-                                    VK.VK_Down(Global.VB_ST);
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "SE")
-                                {
-                                    VK.VK_Down(Global.VB_SE);
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "UP")
-                                {
-                                    VK.VK_Down(Global.VB_UP);
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "DO")
-                                {
-                                    VK.VK_Down(Global.VB_DO);
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "LE")
-                                {
-                                    VK.VK_Down(Global.VB_LE);
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "RI")
-                                {
-                                    VK.VK_Down(Global.VB_RI);
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.SysTarget == "SNES")
-                                {
-                                    if (Global.PV_GROUP == "XX")
+                                // PB - Push Button.
+                                case "PB":
                                     {
-                                        VK.VK_Down(Global.VB_X);
+                                        VK.VK_Down(Global.PV_GROUP);
                                         Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
                                         Global.tmpLineCursor++;
+                                        break;
                                     }
-                                    if (Global.PV_GROUP == "YY")
+                                // RB - Release Button.
+                                case "RB":
                                     {
-                                        VK.VK_Down(Global.VB_Y);
+                                        VK.VK_Up(Global.PV_GROUP);
                                         Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
                                         Global.tmpLineCursor++;
+                                        break;
                                     }
-                                    if (Global.PV_GROUP == "BL")
+                                // RA - Release all buttons.
+                                case "RA":
                                     {
-                                        VK.VK_Down(Global.VB_BL);
+                                        VK.VK_Up(Global.VB_A);
+                                        VK.VK_Up(Global.VB_B);
+                                        VK.VK_Up(Global.VB_ST);
+                                        VK.VK_Up(Global.VB_SE);
+                                        VK.VK_Up(Global.VB_UP);
+                                        VK.VK_Up(Global.VB_DO);
+                                        VK.VK_Up(Global.VB_LE);
+                                        VK.VK_Up(Global.VB_RI);
+                                        if (Global.sysTarget == "QUAD")
+                                        {
+                                            VK.VK_Up(Global.VB_X);
+                                            VK.VK_Up(Global.VB_Y);
+                                            VK.VK_Up(Global.VB_BL);
+                                            VK.VK_Up(Global.VB_BR);
+                                        }
+                                        if (Global.flagExtMode == "true")
+                                        {
+                                            VK.VK_Up(Global.VB_E0);
+                                            VK.VK_Up(Global.VB_E1);
+                                            VK.VK_Up(Global.VB_E2);
+                                            VK.VK_Up(Global.VB_E3);
+                                            VK.VK_Up(Global.VB_E4);
+                                            VK.VK_Up(Global.VB_E5);
+                                            VK.VK_Up(Global.VB_E6);
+                                            VK.VK_Up(Global.VB_E7);
+                                            VK.VK_Up(Global.VB_E8);
+                                            VK.VK_Up(Global.VB_E9);
+                                        }
                                         Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
                                         Global.tmpLineCursor++;
+                                        break;
                                     }
-                                    if (Global.PV_GROUP == "BR")
+                                // HW - Hold/Wait a given time.
+                                case "HW":
                                     {
-                                        VK.VK_Down(Global.VB_BR);
+                                        TI.Hold(Convert.ToInt32(Global.tmpOPValueCache));
                                         Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
                                         Global.tmpLineCursor++;
+                                        break;
                                     }
-                                }
-                                if (Global.flagExtMode == "true")
-                                {
-                                    if (Global.PV_GROUP == "E0")
+                                // JM - Absolute Jump / Infinite Loop to a given line.
+                                case "JM":
                                     {
-                                        VK.VK_Down(Global.VB_E0);
+                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpOPValueCache);
+                                        break;
+                                    }
+                                // JT - Jump X Times to a given line.
+                                case "JT":
+                                    {
+                                        if (Global.tmpJumpCurrent != Global.tmpLineCursor)
+                                        {
+                                            Global.tmpJumpTimes = Convert.ToInt32(Global.tmpOPValueCache);
+                                            Global.tmpJumpTimes = Global.tmpJumpTimes - 1;
+                                            Global.tmpJumpCurrent = Convert.ToInt32(Global.tmpLineCursor);
+                                            Global.tmpLineCursor = Convert.ToInt32(Global.tmpOPAuxValueCache);
+                                        }
+                                        if (Global.tmpJumpCurrent == Global.tmpLineCursor)
+                                        {
+                                            if (Global.tmpJumpTimes >= 1)
+                                            {
+                                                Global.tmpJumpTimes = Global.tmpJumpTimes - 1;
+                                                Global.tmpLineCursor = Convert.ToInt32(Global.tmpOPAuxValueCache);
+                                            }
+                                            else if (Global.tmpJumpTimes <= 0)
+                                            {
+                                                Global.tmpLineCursor++;
+                                                Global.tmpJumpCurrent = 0;
+                                            }
+                                        }
+                                        break;
+                                    }
+                                // RE - Comment / REM
+                                case "RE":
+                                    {
                                         Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
                                         Global.tmpLineCursor++;
+                                        break;
                                     }
-                                    if (Global.PV_GROUP == "E1")
+                                // SP - Soft Push a button a given time
+                                case "SP":
                                     {
-                                        VK.VK_Down(Global.VB_E1);
+                                        VK.VK_HoldUntilDelay(Global.PV_GROUP, Convert.ToInt32(Global.tmpOPValueCache));
                                         Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
                                         Global.tmpLineCursor++;
+                                        break;
                                     }
-                                    if (Global.PV_GROUP == "E2")
+                                // FP - Fast Push a button a given time.
+                                case "FP":
                                     {
-                                        VK.VK_Down(Global.VB_E2);
+                                        VK.VK_HoldUntil(Global.PV_GROUP, Convert.ToInt32(Global.tmpOPValueCache));
                                         Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
                                         Global.tmpLineCursor++;
+                                        break;
                                     }
-                                    if (Global.PV_GROUP == "E3")
+                                // TP - Turbo-Pushes a button a given time.
+                                case "TP":
                                     {
-                                        VK.VK_Down(Global.VB_E3);
+                                        VK.VK_HoldTurbo(Global.PV_GROUP, Convert.ToInt32(Global.tmpOPValueCache));
                                         Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
                                         Global.tmpLineCursor++;
+                                        break;
                                     }
-                                    if (Global.PV_GROUP == "E4")
+                                // KS - Attempts to push a Key String.
+                                case "KS":
                                     {
-                                        VK.VK_Down(Global.VB_E4);
+                                        VK.VK_HoldUntilDelay(Global.tmpOPValueCache, 50);
                                         Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
                                         Global.tmpLineCursor++;
+                                        break;
                                     }
-                                    if (Global.PV_GROUP == "E5")
+                                // SW - Sync Waits until there's no delay.
+                                case "SW":
                                     {
-                                        VK.VK_Down(Global.VB_E5);
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
+                                        if (Global.tmpStackDelay <= Convert.ToInt32(Global.tmpOPValueCache))
+                                        {
+                                            Global.tmpStackSync = Convert.ToInt32(Global.tmpOPValueCache) - Global.tmpStackDelay;
+                                            Global.tmpStackMem = Global.tmpStackDelay;
+                                            TI.Hold(Global.tmpStackSync);
+                                            Global.tmpStackDelay = Global.tmpStackDelay - Global.tmpStackSync;
+                                            if (Global.tmpStackDelay < 0) { Global.tmpStackDelay = 0; }
+                                            Global.tmpStackStatus = 1;
+                                        }
+                                        else
+                                        {
+                                            TI.Hold(Convert.ToInt32(Global.tmpOPValueCache));
+                                            Global.tmpStackDelay -= Convert.ToInt32(Global.tmpOPValueCache);
+                                            Global.tmpStackMem = Global.tmpStackDelay;
+                                            Global.tmpStackStatus = 2;
+                                        }
                                         Global.tmpLineCursor++;
+                                        break;
                                     }
-                                    if (Global.PV_GROUP == "E6")
+                                // SR - Resets the Sync Delay Stack.
+                                case "SR":
                                     {
-                                        VK.VK_Down(Global.VB_E6);
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
+                                        Global.tmpStackDelay = 0;
                                         Global.tmpLineCursor++;
+                                        break;
                                     }
-                                    if (Global.PV_GROUP == "E7")
+                                // DM - Displays marker time.
+                                case "DM":
                                     {
-                                        VK.VK_Down(Global.VB_E7);
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
+                                        Global.tmpStackStatus = 3;
                                         Global.tmpLineCursor++;
+                                        break;
                                     }
-                                    if (Global.PV_GROUP == "E8")
+                                // SM - Sets a new marker and resets the marker counter.
+                                case "SM":
                                     {
-                                        VK.VK_Down(Global.VB_E8);
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
+                                        Global.tmpMarkerMillis = 0;
                                         Global.tmpLineCursor++;
+                                        break;
                                     }
-                                    if (Global.PV_GROUP == "E9")
+                                // CM - Waits if the time marker is lower than the value.
+                                case "CM":
                                     {
-                                        VK.VK_Down(Global.VB_E9);
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
+                                        if (Global.tmpMarkerMillis < Convert.ToInt32(Global.tmpOPValueCache))
+                                        {
+                                            Global.tmpMarkerDifference = Convert.ToInt32(Global.tmpOPValueCache) - Global.tmpMarkerMillis;
+                                            TI.Hold(Global.tmpMarkerDifference);
+                                            Global.tmpStackStatus = 4;
+                                        }
+                                        else
+                                        {
+                                            Global.tmpMarkerDifference = 0;
+                                            Global.tmpStackStatus = 5;
+                                        }
                                         Global.tmpLineCursor++;
+                                        break;
                                     }
-                                }
+                                // EN - Ends the script execution.
+                                case "EN":
+                                    {
+                                        Global.tmpLineCursor = tmpFileSize + 1;
+                                        break;
+                                    }
+                                // WR - Wait for Remote execution.
+                                case "WR":
+                                    {
+                                        Keys tmpControlKey = (Keys)char.ToUpper(Global.VB_LISTENCONTROLKEY[0]);
+                                        bool tmpRemoteFlag = false;
+                                        while (!tmpRemoteFlag)
+                                        {
+                                            if (KeyboardListen.KeyCheck(tmpExecutionKey))
+                                            {
+                                                Global.tmpLineCursor = tmpFileSize + 1;
+                                                tmpRemoteFlag = true;
+                                            }
+                                            if (KeyboardListen.KeyCheck(tmpControlKey))
+                                            {
+                                                tmpRemoteFlag = true;
+                                            }
+                                        }
+                                        Global.tmpLineCursor++;
+                                        break;
+                                    }
                             }
-                            // RB - Release Button.
-                            if (Global.tmpOPCache == "RB")
-                            {
-                                if (Global.PV_GROUP == "A")
-                                {
-                                    VK.VK_Up(Global.VB_A);
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "B")
-                                {
-                                    VK.VK_Up(Global.VB_B);
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "ST")
-                                {
-                                    VK.VK_Up(Global.VB_ST);
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "SE")
-                                {
-                                    VK.VK_Up(Global.VB_SE);
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "UP")
-                                {
-                                    VK.VK_Up(Global.VB_UP);
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "DO")
-                                {
-                                    VK.VK_Up(Global.VB_DO);
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "LE")
-                                {
-                                    VK.VK_Up(Global.VB_LE);
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "RI")
-                                {
-                                    VK.VK_Up(Global.VB_RI);
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.SysTarget == "SNES")
-                                {
-                                    if (Global.PV_GROUP == "XX")
-                                    {
-                                        VK.VK_Up(Global.VB_X);
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "YY")
-                                    {
-                                        VK.VK_Up(Global.VB_Y);
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "BL")
-                                    {
-                                        VK.VK_Up(Global.VB_BL);
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "BR")
-                                    {
-                                        VK.VK_Up(Global.VB_BR);
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                }
-                                if (Global.flagExtMode == "true")
-                                {
-                                    if (Global.PV_GROUP == "E0")
-                                    {
-                                        VK.VK_Up(Global.VB_E0);
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E1")
-                                    {
-                                        VK.VK_Up(Global.VB_E1);
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E2")
-                                    {
-                                        VK.VK_Up(Global.VB_E2);
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E3")
-                                    {
-                                        VK.VK_Up(Global.VB_E3);
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E4")
-                                    {
-                                        VK.VK_Up(Global.VB_E4);
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E5")
-                                    {
-                                        VK.VK_Up(Global.VB_E5);
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E6")
-                                    {
-                                        VK.VK_Up(Global.VB_E6);
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E7")
-                                    {
-                                        VK.VK_Up(Global.VB_E7);
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E8")
-                                    {
-                                        VK.VK_Up(Global.VB_E8);
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E9")
-                                    {
-                                        VK.VK_Up(Global.VB_E9);
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                }
-                            }
-                            // RA - Release all buttons.
-                            if (Global.tmpOPCache == "RA")
-                            {
-                                VK.VK_Up(Global.VB_A);
-                                VK.VK_Up(Global.VB_B);
-                                VK.VK_Up(Global.VB_ST);
-                                VK.VK_Up(Global.VB_SE);
-                                VK.VK_Up(Global.VB_UP);
-                                VK.VK_Up(Global.VB_DO);
-                                VK.VK_Up(Global.VB_LE);
-                                VK.VK_Up(Global.VB_RI);
-                                if (Global.SysTarget == "SNES")
-                                {
-                                    VK.VK_Up(Global.VB_X);
-                                    VK.VK_Up(Global.VB_Y);
-                                    VK.VK_Up(Global.VB_BL);
-                                    VK.VK_Up(Global.VB_BR);
-                                }
-                                if (Global.flagExtMode == "true")
-                                {
-                                    VK.VK_Up(Global.VB_E0);
-                                    VK.VK_Up(Global.VB_E1);
-                                    VK.VK_Up(Global.VB_E2);
-                                    VK.VK_Up(Global.VB_E3);
-                                    VK.VK_Up(Global.VB_E4);
-                                    VK.VK_Up(Global.VB_E5);
-                                    VK.VK_Up(Global.VB_E6);
-                                    VK.VK_Up(Global.VB_E7);
-                                    VK.VK_Up(Global.VB_E8);
-                                    VK.VK_Up(Global.VB_E9);
-                                }
-                                Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                Global.tmpLineCursor++;
-                            }
-                            // HW - Hold/Wait a given time.
-                            if (Global.tmpOPCache == "HW")
-                            {
-                                TI.Hold(Convert.ToInt32(Global.tmpOPValueCache));
-                                Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                Global.tmpLineCursor++;
-                            }
-                            // JM - Absolute Jump / Infinite Loop to a given line.
-                            if (Global.tmpOPCache == "JM")
-                            {
-                                Global.tmpLineCursor = Convert.ToInt32(Global.tmpOPValueCache);
-                            }
-                            // JT - Jump X Times to a given line.
-                            if (Global.tmpOPCache == "JT")
-                            {
-                                if (Global.tmpJumpCurrent != Global.tmpLineCursor)
-                                {
-                                    Global.tmpJumpTimes = Convert.ToInt32(Global.tmpOPValueCache);
-                                    Global.tmpJumpTimes = Global.tmpJumpTimes - 1;
-                                    Global.tmpJumpCurrent = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpOPAuxValueCache);
-                                }
-                                if (Global.tmpJumpCurrent == Global.tmpLineCursor)
-                                {
-                                    if (Global.tmpJumpTimes >= 1)
-                                    {
-                                        Global.tmpJumpTimes = Global.tmpJumpTimes - 1;
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpOPAuxValueCache);
-                                    }
-                                    else if (Global.tmpJumpTimes <= 0)
-                                    {
-                                        Global.tmpLineCursor++;
-                                        Global.tmpJumpCurrent = 0;
-                                    }
-                                }
-                            }
-                            // RE - Comment / REM
-                            if (Global.tmpOPCache == "RE")
-                            {
-                                Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                Global.tmpLineCursor++;
-                            }
-                            // SP - Soft Push a button a given time
-                            if (Global.tmpOPCache == "SP")
-                            {
-                                if (Global.PV_GROUP == "A")
-                                {
-                                    VK.VK_HoldUntilDelay(Global.VB_A, Convert.ToInt32(Global.tmpOPValueCache));
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "B")
-                                {
-                                    VK.VK_HoldUntilDelay(Global.VB_B, Convert.ToInt32(Global.tmpOPValueCache));
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "ST")
-                                {
-                                    VK.VK_HoldUntilDelay(Global.VB_ST, Convert.ToInt32(Global.tmpOPValueCache));
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "SE")
-                                {
-                                    VK.VK_HoldUntilDelay(Global.VB_SE, Convert.ToInt32(Global.tmpOPValueCache));
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "UP")
-                                {
-                                    VK.VK_HoldUntilDelay(Global.VB_UP, Convert.ToInt32(Global.tmpOPValueCache));
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "DO")
-                                {
-                                    VK.VK_HoldUntilDelay(Global.VB_DO, Convert.ToInt32(Global.tmpOPValueCache));
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "LE")
-                                {
-                                    VK.VK_HoldUntilDelay(Global.VB_LE, Convert.ToInt32(Global.tmpOPValueCache));
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "RI")
-                                {
-                                    VK.VK_HoldUntilDelay(Global.VB_RI, Convert.ToInt32(Global.tmpOPValueCache));
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.SysTarget == "SNES")
-                                {
-                                    if (Global.PV_GROUP == "XX")
-                                    {
-                                        VK.VK_HoldUntilDelay(Global.VB_X, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "YY")
-                                    {
-                                        VK.VK_HoldUntilDelay(Global.VB_Y, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "BL")
-                                    {
-                                        VK.VK_HoldUntilDelay(Global.VB_BL, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "BR")
-                                    {
-                                        VK.VK_HoldUntilDelay(Global.VB_BR, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                }
-                                if (Global.flagExtMode == "true")
-                                {
-                                    if (Global.PV_GROUP == "E0")
-                                    {
-                                        VK.VK_HoldUntilDelay(Global.VB_E0, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E1")
-                                    {
-                                        VK.VK_HoldUntilDelay(Global.VB_E1, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E2")
-                                    {
-                                        VK.VK_HoldUntilDelay(Global.VB_E2, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E3")
-                                    {
-                                        VK.VK_HoldUntilDelay(Global.VB_E3, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E4")
-                                    {
-                                        VK.VK_HoldUntilDelay(Global.VB_E4, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E5")
-                                    {
-                                        VK.VK_HoldUntilDelay(Global.VB_E5, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E6")
-                                    {
-                                        VK.VK_HoldUntilDelay(Global.VB_E6, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E7")
-                                    {
-                                        VK.VK_HoldUntilDelay(Global.VB_E7, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E8")
-                                    {
-                                        VK.VK_HoldUntilDelay(Global.VB_E8, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E9")
-                                    {
-                                        VK.VK_HoldUntilDelay(Global.VB_E9, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                }
-                            }
-                            // FP - Fast Push a button a given time.
-                            if (Global.tmpOPCache == "FP")
-                            {
-                                if (Global.PV_GROUP == "A")
-                                {
-                                    VK.VK_HoldUntil(Global.VB_A, Convert.ToInt32(Global.tmpOPValueCache));
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "B")
-                                {
-                                    VK.VK_HoldUntil(Global.VB_B, Convert.ToInt32(Global.tmpOPValueCache));
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "ST")
-                                {
-                                    VK.VK_HoldUntil(Global.VB_ST, Convert.ToInt32(Global.tmpOPValueCache));
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "SE")
-                                {
-                                    VK.VK_HoldUntil(Global.VB_SE, Convert.ToInt32(Global.tmpOPValueCache));
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "UP")
-                                {
-                                    VK.VK_HoldUntil(Global.VB_UP, Convert.ToInt32(Global.tmpOPValueCache));
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "DO")
-                                {
-                                    VK.VK_HoldUntil(Global.VB_DO, Convert.ToInt32(Global.tmpOPValueCache));
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "LE")
-                                {
-                                    VK.VK_HoldUntil(Global.VB_LE, Convert.ToInt32(Global.tmpOPValueCache));
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "RI")
-                                {
-                                    VK.VK_HoldUntil(Global.VB_RI, Convert.ToInt32(Global.tmpOPValueCache));
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.SysTarget == "SNES")
-                                {
-                                    if (Global.PV_GROUP == "XX")
-                                    {
-                                        VK.VK_HoldUntil(Global.VB_X, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "YY")
-                                    {
-                                        VK.VK_HoldUntil(Global.VB_Y, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "BL")
-                                    {
-                                        VK.VK_HoldUntil(Global.VB_BL, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "BR")
-                                    {
-                                        VK.VK_HoldUntil(Global.VB_BR, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                }
-                                if (Global.flagExtMode == "true")
-                                {
-                                    if (Global.PV_GROUP == "E0")
-                                    {
-                                        VK.VK_HoldUntil(Global.VB_E0, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E1")
-                                    {
-                                        VK.VK_HoldUntil(Global.VB_E1, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E2")
-                                    {
-                                        VK.VK_HoldUntil(Global.VB_E2, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E3")
-                                    {
-                                        VK.VK_HoldUntil(Global.VB_E3, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E4")
-                                    {
-                                        VK.VK_HoldUntil(Global.VB_E4, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E5")
-                                    {
-                                        VK.VK_HoldUntil(Global.VB_E5, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E6")
-                                    {
-                                        VK.VK_HoldUntil(Global.VB_E6, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E7")
-                                    {
-                                        VK.VK_HoldUntil(Global.VB_E7, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E8")
-                                    {
-                                        VK.VK_HoldUntil(Global.VB_E8, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E9")
-                                    {
-                                        VK.VK_HoldUntil(Global.VB_E9, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                }
-                            }
-                            // TP - Turbo-Pushes a button a given time.
-                            if (Global.tmpOPCache == "TP")
-                            {
-                                if (Global.PV_GROUP == "A")
-                                {
-                                    VK.VK_HoldTurbo(Global.VB_A, Convert.ToInt32(Global.tmpOPValueCache));
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "B")
-                                {
-                                    VK.VK_HoldTurbo(Global.VB_B, Convert.ToInt32(Global.tmpOPValueCache));
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "ST")
-                                {
-                                    VK.VK_HoldTurbo(Global.VB_ST, Convert.ToInt32(Global.tmpOPValueCache));
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "SE")
-                                {
-                                    VK.VK_HoldTurbo(Global.VB_SE, Convert.ToInt32(Global.tmpOPValueCache));
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "UP")
-                                {
-                                    VK.VK_HoldTurbo(Global.VB_UP, Convert.ToInt32(Global.tmpOPValueCache));
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "DO")
-                                {
-                                    VK.VK_HoldTurbo(Global.VB_DO, Convert.ToInt32(Global.tmpOPValueCache));
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "LE")
-                                {
-                                    VK.VK_HoldTurbo(Global.VB_LE, Convert.ToInt32(Global.tmpOPValueCache));
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.PV_GROUP == "RI")
-                                {
-                                    VK.VK_HoldTurbo(Global.VB_RI, Convert.ToInt32(Global.tmpOPValueCache));
-                                    Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                    Global.tmpLineCursor++;
-                                }
-                                if (Global.SysTarget == "SNES")
-                                {
-                                    if (Global.PV_GROUP == "XX")
-                                    {
-                                        VK.VK_HoldTurbo(Global.VB_X, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "YY")
-                                    {
-                                        VK.VK_HoldTurbo(Global.VB_Y, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "BL")
-                                    {
-                                        VK.VK_HoldTurbo(Global.VB_BL, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "BR")
-                                    {
-                                        VK.VK_HoldTurbo(Global.VB_BR, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                }
-                                if (Global.flagExtMode == "true")
-                                {
-                                    if (Global.PV_GROUP == "E0")
-                                    {
-                                        VK.VK_HoldTurbo(Global.VB_E0, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E1")
-                                    {
-                                        VK.VK_HoldTurbo(Global.VB_E1, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E2")
-                                    {
-                                        VK.VK_HoldTurbo(Global.VB_E2, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E3")
-                                    {
-                                        VK.VK_HoldTurbo(Global.VB_E3, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E4")
-                                    {
-                                        VK.VK_HoldTurbo(Global.VB_E4, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E5")
-                                    {
-                                        VK.VK_HoldTurbo(Global.VB_E5, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E6")
-                                    {
-                                        VK.VK_HoldTurbo(Global.VB_E6, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E7")
-                                    {
-                                        VK.VK_HoldTurbo(Global.VB_E7, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E8")
-                                    {
-                                        VK.VK_HoldTurbo(Global.VB_E8, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                    if (Global.PV_GROUP == "E9")
-                                    {
-                                        VK.VK_HoldTurbo(Global.VB_E9, Convert.ToInt32(Global.tmpOPValueCache));
-                                        Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                        Global.tmpLineCursor++;
-                                    }
-                                }
-                            }
-                            // KS - Attempts to push a Key String.
-                            if (Global.tmpOPCache == "KS")
-                            {
-                                VK.VK_HoldUntilDelay(Global.tmpOPValueCache, 50);
-                                Global.tmpLineCursor = Convert.ToInt32(Global.tmpLineCursor);
-                                Global.tmpLineCursor++;
-                            }
-                            // SW - Sync Waits until there's no delay.
-                            if (Global.tmpOPCache == "SW")
-                            {
-                                if (Global.tmpStackDelay <= Convert.ToInt32(Global.tmpOPValueCache))
-                                {
-                                    Global.tmpStackSync = Convert.ToInt32(Global.tmpOPValueCache) - Global.tmpStackDelay;
-                                    Global.tmpStackMem = Global.tmpStackDelay;
-                                    TI.Hold(Global.tmpStackSync);
-                                    Global.tmpStackDelay = Global.tmpStackDelay - Global.tmpStackSync;
-                                    if (Global.tmpStackDelay < 0) { Global.tmpStackDelay = 0; }
-                                    Global.tmpStackStatus = 1;
-                                }
-                                else
-                                {
-                                    TI.Hold(Convert.ToInt32(Global.tmpOPValueCache));
-                                    Global.tmpStackDelay -= Convert.ToInt32(Global.tmpOPValueCache);
-                                    Global.tmpStackMem = Global.tmpStackDelay;
-                                    Global.tmpStackStatus = 2;
-                                }
-                                Global.tmpLineCursor++;
-                            }
-                            // SR - Resets the Sync Delay Stack.
-                            if (Global.tmpOPCache == "SR")
-                            {
-                                Global.tmpStackDelay = 0;
-                                Global.tmpLineCursor++;
-                            }
-                            // DM - Displays marker time.
-                            if (Global.tmpOPCache == "DM")
-                            {
-                                Global.tmpStackStatus = 3;
-                                Global.tmpLineCursor++;
-                            }
-                            // SM - Sets a new marker and resets the marker counter.
-                            if (Global.tmpOPCache == "SM")
-                            {
-                                Global.tmpMarkerMillis = 0;
-                                Global.tmpLineCursor++;
-                            }
-                            // CM - Waits if the time marker is lower than the value.
-                            if (Global.tmpOPCache == "CM")
-                            {
-                                if (Global.tmpMarkerMillis < Convert.ToInt32(Global.tmpOPValueCache))
-                                {
-                                    Global.tmpMarkerDifference = Convert.ToInt32(Global.tmpOPValueCache) - Global.tmpMarkerMillis;
-                                    TI.Hold(Global.tmpMarkerDifference);
-                                    Global.tmpStackStatus = 4;
-                                }
-                                else
-                                {
-                                    Global.tmpMarkerDifference = 0;
-                                    Global.tmpStackStatus = 5;
-                                }
-                                Global.tmpLineCursor++;
-                            }
-                            // EN - Ends the script execution.
-                            if (Global.tmpOPCache == "EN")
-                            {
-                                Global.tmpLineCursor = tmpFileSize + 1;
-                            }
+
                             // Calculate the Delta time between OpCodes.
                             if (Global.SW.ElapsedMilliseconds >= 1000000)
                             {
@@ -3691,51 +3510,40 @@ namespace KasTAS
                             }
                             // Parse to avoid tmpOPValueCache being not an integer
                             Global.tmpIsParsed = int.TryParse((Global.tmpOPValueCache), out Global.outVal);
-                            if (Global.tmpIsParsed == false) { Global.tmpOPValueCache = "0"; } 
+                            if (!Global.tmpIsParsed) { Global.tmpOPValueCache = "0"; }
                             // Sync count all delay.
-                            if (Global.tmpOPCache == "SP")
+                            switch (Global.tmpOPCache)
                             {
-                                Global.tmpStackDelay += (Global.tmpDeltaMillis - (Convert.ToInt32(Global.tmpOPValueCache) + 25));
-                                Global.tmpStackException = true;
-                            }
-                            else if (Global.tmpOPCache == "KS")
-                            {
-                                Global.tmpStackDelay += (Global.tmpDeltaMillis - (Convert.ToInt32(Global.tmpOPValueCache) + 50));
-                                Global.tmpStackException = true;
-                            }
-                            else if (Global.tmpOPCache == "SM")
-                            {
-                                Global.tmpStackDelay += Global.tmpDeltaMillis;
-                                Global.tmpStackException = true;
-                            }
-                            else if (Global.tmpOPCache == "DM")
-                            {
-                                Global.tmpStackDelay += Global.tmpDeltaMillis;
-                                Global.tmpStackException = true;
-                            }
-                            else if (Global.tmpOPCache == "SR")
-                            {
-                                Global.tmpStackDelay += Global.tmpDeltaMillis;
-                                Global.tmpStackException = true;
-                            }
-                            else if (Global.tmpOPCache == "CM")
-                            {
-                                Global.tmpStackDelay += Global.tmpDeltaMillis - Global.tmpMarkerDifference;
-                                Global.tmpStackException = true;
-                            }
-                            if (Global.tmpStackException == false)
-                            {
-                                if (Global.tmpKindOfOP == "TI")
-                                {
-                                    Global.tmpStackDelay += (Global.tmpDeltaMillis - Convert.ToInt32(Global.tmpOPValueCache));
-                                }
-                                else if (Global.tmpKindOfOP == "SP")
-                                {
-                                    Global.tmpStackDelay += (Global.tmpDeltaMillis - Convert.ToInt32(Global.tmpOPValueCache));
-                                }
-                                else
-                                {
+                                case "SP":
+                                    Global.tmpStackDelay += Global.tmpDeltaMillis - (Convert.ToInt32(Global.tmpOPValueCache) + 25);
+                                    Global.tmpStackException = true;
+                                    break;
+                                case "KS":
+                                    Global.tmpStackDelay += Global.tmpDeltaMillis - (Convert.ToInt32(Global.tmpOPValueCache) + 50);
+                                    Global.tmpStackException = true;
+                                    break;
+                                case "SM":
+                                case "DM":
+                                case "SR":
                                     Global.tmpStackDelay += Global.tmpDeltaMillis;
+                                    Global.tmpStackException = true;
+                                    break;
+                                case "CM":
+                                    Global.tmpStackDelay += Global.tmpDeltaMillis - Global.tmpMarkerDifference;
+                                    Global.tmpStackException = true;
+                                    break;
+                            }
+                            if (!Global.tmpStackException)
+                            {
+                                switch (Global.tmpKindOfOP)
+                                {
+                                    case OP_States.TI:
+                                    case OP_States.SP:
+                                        Global.tmpStackDelay += (Global.tmpDeltaMillis - Convert.ToInt32(Global.tmpOPValueCache));
+                                        break;
+                                    default:
+                                        Global.tmpStackDelay += Global.tmpDeltaMillis;
+                                        break;
                                 }
                             }
                             if (Global.tmpStackDelay < 0) { Global.tmpStackDelay = 0; }
@@ -3743,12 +3551,34 @@ namespace KasTAS
                             Global.tmpMarkerMillis += Global.tmpDeltaMillis;
                             WRT.WR(Convert.ToString(Global.tmpDeltaMillis), "White", "Black");
                             WRT.WR(" ▲ms", "White", "Black");
-                            if (Global.tmpStackStatus == 1) { WRT.WR(" (" + Global.tmpStackMem + "ms)", "Green", "Black"); Global.tmpStackStatus = 0; }
-                            if (Global.tmpStackStatus == 2) { WRT.WR(" (" + Global.tmpStackMem + "ms)", "Red", "Black"); Global.tmpStackStatus = 0; }
-                            if (Global.tmpStackStatus == 3) { WRT.WR(" (" + Global.tmpMarkerMillis + "ms)", "White", "Black"); Global.tmpStackStatus = 0; }
-                            if (Global.tmpStackStatus == 4) { WRT.WR(" (" + Global.tmpMarkerDifference + "ms)", "Green", "Black"); Global.tmpStackStatus = 0; }
-                            if (Global.tmpStackStatus == 5) { WRT.WR(" (0 ms)", "White", "Black"); Global.tmpStackStatus = 0; }
+                            switch (Global.tmpStackStatus)
+                            {
+                                case 1:
+                                    WRT.WR(" (" + Global.tmpStackMem + "ms)", "Green", "Black"); 
+                                    Global.tmpStackStatus = 0;
+                                    break;
+                                case 2:
+                                    WRT.WR(" (" + Global.tmpStackMem + "ms)", "Red", "Black"); 
+                                    Global.tmpStackStatus = 0;
+                                    break;
+                                case 3:
+                                    WRT.WR(" (" + Global.tmpMarkerMillis + "ms)", "White", "Black"); 
+                                    Global.tmpStackStatus = 0;
+                                    break;
+                                case 4:
+                                    WRT.WR(" (" + Global.tmpMarkerDifference + "ms)", "Green", "Black"); 
+                                    Global.tmpStackStatus = 0;
+                                    break;
+                                case 5:
+                                    WRT.WR(" (0 ms)", "White", "Black"); 
+                                    Global.tmpStackStatus = 0;
+                                    break;
+                            }
                             WRT.WRLine(" ", "White", "Black"); // Intro endline.
+                            if (KeyboardListen.KeyCheck(tmpExecutionKey))
+                            {
+                                Global.tmpLineCursor = tmpFileSize + 1; // End execution if execution key is pressed
+                            }
                             Global.tmpLineTotal += 1;
                         } // Execution While end.
                         Global.tmpElapsedMillis = Convert.ToInt32(Global.SW.ElapsedMilliseconds);
@@ -3775,11 +3605,293 @@ namespace KasTAS
                 }
                 if ((Global.tmpUserInput == "2") || (Global.tmpUserInput.ToLower() == "e"))
                 {
-                    Global.KSOAutoScriptExecuteMode = false;
+                    Global.KASScriptExecuteMode = false;
                     Global.tmpUserInput = "NULL";
                     return;
-                    WRT.WRLine(" Leaving Script Execution...", "White", "Black");
+                    // WRT.WRLine(" Leaving Script Execution...", "White", "Black");
                 }
+            } // Active While End
+        }
+        public static void GenerateKAS()
+        {
+            GUI.DrawGenerateMenu();
+            Global.restartArea = false;
+            while(Global.KASScriptGenerateMode == true)
+            {
+                if (Global.restartArea == false)
+                {
+                    Global.tmpUserInput = EXF.StaticPrompt();
+                }
+                else
+                {
+                    EXF.GenerateKAS();
+                }
+                if ((Global.tmpUserInput == "1") || (Global.tmpUserInput.ToLower() == "g"))
+                {
+                    GUI.DrawGenFileMenu();
+                    Global.tmpUserInput = EXF.FileStaticPrompt();
+                    Global.lastFileLoaded = Global.tmpUserInput;
+                    Global.tmpWritePad = "00 LAST FILE    = " + Global.lastFileLoaded;
+                    EXF.WriteToCfg(0, Global.tmpWritePad);
+                    // Header Line
+                    string tmpOutString = "RE - KAS Script File -";
+                    File.AppendAllText(Global.scriptsDirectory + Global.tmpUserInput, tmpOutString + Environment.NewLine);
+                    WRT.WR(tmpOutString, "DarkMagenta", "Black");
+                    System.DateTime tmpDateTime = System.DateTime.Now;
+                    string tmpTimeString = tmpDateTime.Day + "/" + tmpDateTime.Month + "/" + tmpDateTime.Year + " " + tmpDateTime.Hour + ":" + tmpDateTime.Minute + ":" + tmpDateTime.Second;
+                    tmpOutString = "RE " + tmpTimeString;
+                    // Creation Time Line
+                    File.AppendAllText(Global.scriptsDirectory + Global.tmpUserInput, tmpOutString + Environment.NewLine);
+                    GC.Collect();
+                    // Initialize temporary key values
+                    bool tmpStartFlag = false;
+                    bool tmpChangesFlag = false;
+                    int tmpTotalKeystrokes = 0;
+                    int tmpOldMillis = 0;
+                    int tmpCalc = 0;
+                    int tmpMarkerCounter = 0;
+                    Keys[] tmpKeyArray = new Keys[22];
+                    bool[] tmpKeyBoolArray = new bool[22];
+                    string[] tmpKeyStringArray = new string[22];
+                    int tmpKeyArrayLimit = 7;
+                    EXF.ResetKeyboardBooleans();
+                    Keys tmpControlKey = (Keys)char.ToUpper(Global.VB_LISTENCONTROLKEY[0]);
+                    Keys tmpMarkerKey = (Keys)char.ToUpper(Global.VB_LISTENMARKERKEY[0]);
+                    Keys tmpAKey = (Keys)char.ToUpper(Global.VB_A[0]);
+                    Keys tmpBKey = (Keys)char.ToUpper(Global.VB_B[0]);
+                    Keys tmpSTKey = (Keys)char.ToUpper(Global.VB_ST[0]);
+                    Keys tmpSEKey = (Keys)char.ToUpper(Global.VB_SE[0]);
+                    Keys tmpUPKey = (Keys)char.ToUpper(Global.VB_UP[0]);
+                    Keys tmpDOKey = (Keys)char.ToUpper(Global.VB_DO[0]);
+                    Keys tmpLEKey = (Keys)char.ToUpper(Global.VB_LE[0]);
+                    Keys tmpRIKey = (Keys)char.ToUpper(Global.VB_RI[0]);
+                    tmpKeyArray[0] = tmpAKey;
+                    tmpKeyArray[1] = tmpBKey;
+                    tmpKeyArray[2] = tmpSTKey;
+                    tmpKeyArray[3] = tmpSEKey;
+                    tmpKeyArray[4] = tmpUPKey;
+                    tmpKeyArray[5] = tmpDOKey;
+                    tmpKeyArray[6] = tmpLEKey;
+                    tmpKeyArray[7] = tmpRIKey;
+                    tmpKeyBoolArray[0] = Global.L_A;
+                    tmpKeyBoolArray[1] = Global.L_B;
+                    tmpKeyBoolArray[2] = Global.L_ST;
+                    tmpKeyBoolArray[3] = Global.L_SE;
+                    tmpKeyBoolArray[4] = Global.L_UP;
+                    tmpKeyBoolArray[5] = Global.L_DO;
+                    tmpKeyBoolArray[6] = Global.L_LE;
+                    tmpKeyBoolArray[7] = Global.L_RI;
+                    tmpKeyStringArray[0] = "AA";
+                    tmpKeyStringArray[1] = "BB";
+                    tmpKeyStringArray[2] = "ST";
+                    tmpKeyStringArray[3] = "SE";
+                    tmpKeyStringArray[4] = "UP";
+                    tmpKeyStringArray[5] = "DO";
+                    tmpKeyStringArray[6] = "LE";
+                    tmpKeyStringArray[7] = "RI";
+                    if (Global.sysTarget == "QUAD")
+                    {
+                        Keys tmpXKey = (Keys)char.ToUpper(Global.VB_X[0]);
+                        Keys tmpYKey = (Keys)char.ToUpper(Global.VB_Y[0]);
+                        Keys tmpBLKey = (Keys)char.ToUpper(Global.VB_BL[0]);
+                        Keys tmpBRKey = (Keys)char.ToUpper(Global.VB_BR[0]);
+                        tmpKeyArray[8] = tmpXKey;
+                        tmpKeyArray[9] = tmpYKey;
+                        tmpKeyArray[10] = tmpBLKey;
+                        tmpKeyArray[11] = tmpBRKey;
+                        tmpKeyBoolArray[8] = Global.L_X;
+                        tmpKeyBoolArray[9] = Global.L_Y;
+                        tmpKeyBoolArray[10] = Global.L_BL;
+                        tmpKeyBoolArray[11] = Global.L_BR;
+                        tmpKeyStringArray[8] = "XX";
+                        tmpKeyStringArray[9] = "YY";
+                        tmpKeyStringArray[10] = "BL";
+                        tmpKeyStringArray[11] = "BR";
+                        tmpKeyArrayLimit = 11;
+                    }
+                    if (Global.flagExtMode == "true")
+                    {
+                        Keys tmpE0Key = (Keys)char.ToUpper(Global.VB_E0[0]);
+                        Keys tmpE1Key = (Keys)char.ToUpper(Global.VB_E1[0]);
+                        Keys tmpE2Key = (Keys)char.ToUpper(Global.VB_E2[0]);
+                        Keys tmpE3Key = (Keys)char.ToUpper(Global.VB_E3[0]);
+                        Keys tmpE4Key = (Keys)char.ToUpper(Global.VB_E4[0]);
+                        Keys tmpE5Key = (Keys)char.ToUpper(Global.VB_E5[0]);
+                        Keys tmpE6Key = (Keys)char.ToUpper(Global.VB_E6[0]);
+                        Keys tmpE7Key = (Keys)char.ToUpper(Global.VB_E7[0]);
+                        Keys tmpE8Key = (Keys)char.ToUpper(Global.VB_E8[0]);
+                        Keys tmpE9Key = (Keys)char.ToUpper(Global.VB_E9[0]);
+                        tmpKeyArray[12] = tmpE0Key;
+                        tmpKeyArray[13] = tmpE1Key;
+                        tmpKeyArray[14] = tmpE2Key;
+                        tmpKeyArray[15] = tmpE3Key;
+                        tmpKeyArray[16] = tmpE4Key;
+                        tmpKeyArray[17] = tmpE5Key;
+                        tmpKeyArray[18] = tmpE6Key;
+                        tmpKeyArray[19] = tmpE7Key;
+                        tmpKeyArray[20] = tmpE8Key;
+                        tmpKeyArray[21] = tmpE9Key;
+                        tmpKeyBoolArray[12] = Global.L_E0;
+                        tmpKeyBoolArray[13] = Global.L_E1;
+                        tmpKeyBoolArray[14] = Global.L_E2;
+                        tmpKeyBoolArray[15] = Global.L_E3;
+                        tmpKeyBoolArray[16] = Global.L_E4;
+                        tmpKeyBoolArray[17] = Global.L_E5;
+                        tmpKeyBoolArray[18] = Global.L_E6;
+                        tmpKeyBoolArray[19] = Global.L_E7;
+                        tmpKeyBoolArray[20] = Global.L_E8;
+                        tmpKeyBoolArray[21] = Global.L_E9;
+                        tmpKeyStringArray[12] = "E0";
+                        tmpKeyStringArray[13] = "E1";
+                        tmpKeyStringArray[14] = "E2";
+                        tmpKeyStringArray[15] = "E3";
+                        tmpKeyStringArray[16] = "E4";
+                        tmpKeyStringArray[17] = "E5";
+                        tmpKeyStringArray[18] = "E6";
+                        tmpKeyStringArray[19] = "E7";
+                        tmpKeyStringArray[20] = "E8";
+                        tmpKeyStringArray[21] = "E9";
+                        tmpKeyArrayLimit = 21;
+                    }
+                    GUI.DrawGenFilePanel();
+                    Console.SetCursorPosition(0, Global.windowH - 3);
+                    GUI.DrawLowerBarSpacer();
+                    WRT.WR(" ▬ ", "Cyan", "Black");
+                    WRT.WR("Recording status is [", "White", "Black");
+                    WRT.WR("OFF", "DarkRed", "Black");
+                    WRT.WR("]", "White", "Black");
+                    WRT.WR(" | Total events registered: [", "White", "Black");
+                    WRT.WR(tmpTotalKeystrokes.ToString(), "Cyan", "Black");
+                    WRT.WRLine("]", "White", "Black");
+                    while (!tmpStartFlag)
+                    {
+                        if(KeyboardListen.KeyCheck(tmpControlKey))
+                        {
+                            // Start Milliseconds Control Counter.
+                            Global.tmpMarkerMillis = 0;
+                            Global.SW.Start();
+                            // Stop in case it was already running from another execution.
+                            Global.SW.Stop();
+                            Global.SW.Start();
+                            Global.SW.Restart();
+                            Global.tmpLastMillis = Convert.ToInt32(Global.SW.ElapsedMilliseconds);
+                            // Recording Start Line
+                            tmpOutString = "RE Recording Started";
+                            File.AppendAllText(Global.scriptsDirectory + Global.tmpUserInput, tmpOutString + Environment.NewLine);
+                            // Recording Start Time Line
+                            tmpDateTime = System.DateTime.Now;
+                            tmpTimeString = tmpDateTime.Day + "/" + tmpDateTime.Month + "/" + tmpDateTime.Year + " " + tmpDateTime.Hour + ":" + tmpDateTime.Minute + ":" + tmpDateTime.Second;
+                            tmpOutString = "RE " + tmpTimeString;
+                            File.AppendAllText(Global.scriptsDirectory + Global.tmpUserInput, tmpOutString + Environment.NewLine);
+                            Console.SetCursorPosition(0, Global.windowH - 3);
+                            GUI.DrawLowerBarSpacer();
+                            WRT.WR(" ▬ ", "Cyan", "Black");
+                            WRT.WR("Recording status is [", "White", "Black");
+                            WRT.WR("ON", "Green", "Black");
+                            WRT.WR("]", "White", "Black");
+                            WRT.WR(" | Total events registered: [", "White", "Black");
+                            WRT.WR(tmpTotalKeystrokes.ToString(), "Cyan", "Black");
+                            WRT.WRLine("]   ", "White", "Black");
+                            tmpStartFlag = true;
+                        }
+                    }
+                    while (tmpStartFlag)
+                    {
+                        tmpChangesFlag = false;
+                        // Stop Control Key
+                        if (KeyboardListen.KeyCheck(tmpControlKey))
+                        {
+                            Global.tmpLastMillis = Convert.ToInt32(Global.SW.ElapsedMilliseconds);
+                            if (Global.tmpLastMillis >= 500)
+                            {
+                                tmpStartFlag = false; // End the recording sequence
+                            }
+                        }
+                        // Insert Marker Key
+                        if (KeyboardListen.KeyCheck(tmpMarkerKey))
+                        {
+                            if (!Global.L_MARKERKEY)
+                            {
+                                tmpTotalKeystrokes++;
+                                tmpOutString = "RE - MARKER #" + tmpMarkerCounter + " -";
+                                File.AppendAllText(Global.scriptsDirectory + Global.tmpUserInput, tmpOutString + Environment.NewLine);
+                                tmpMarkerCounter++;
+                                Global.L_MARKERKEY = true;
+                            }
+                        }
+                        else
+                        {
+                            Global.L_MARKERKEY = false;
+                        }
+                        // ?
+                        for (int i = 0; i <= tmpKeyArrayLimit; i++)
+                        {
+                            if (KeyboardListen.KeyCheck(tmpKeyArray[i]))
+                            {
+                                if (!tmpKeyBoolArray[i])
+                                {
+                                    tmpChangesFlag = true;
+                                    tmpTotalKeystrokes++;
+                                    Global.tmpLastMillis = Convert.ToInt32(Global.SW.ElapsedMilliseconds);
+                                    if (Global.tmpLastMillis > tmpOldMillis)
+                                    {
+                                        tmpCalc = Global.tmpLastMillis - tmpOldMillis;
+                                        if (tmpCalc > (Global.genCompensationValue + 1)) { tmpCalc -= Global.genCompensationValue; }
+                                        tmpOldMillis = Global.tmpLastMillis;
+                                        File.AppendAllText(Global.scriptsDirectory + Global.tmpUserInput, "SW " + tmpCalc + Environment.NewLine);
+                                    }
+                                    tmpKeyBoolArray[i] = true;
+                                    File.AppendAllText(Global.scriptsDirectory + Global.tmpUserInput, "PB " + tmpKeyStringArray[i] + Environment.NewLine);
+                                }
+                            }
+                            else
+                            {
+                                if (tmpKeyBoolArray[i])
+                                {
+                                    tmpChangesFlag = true;
+                                    tmpTotalKeystrokes++;
+                                    Global.tmpLastMillis = Convert.ToInt32(Global.SW.ElapsedMilliseconds);
+                                    if (Global.tmpLastMillis > tmpOldMillis)
+                                    {
+                                        tmpCalc = Global.tmpLastMillis - tmpOldMillis;
+                                        if (tmpCalc > (Global.genCompensationValue + 1)) { tmpCalc -= Global.genCompensationValue; }
+                                        tmpOldMillis = Global.tmpLastMillis;
+                                        File.AppendAllText(Global.scriptsDirectory + Global.tmpUserInput, "SW " + tmpCalc + Environment.NewLine);
+                                    }
+                                    tmpKeyBoolArray[i] = false;
+                                    File.AppendAllText(Global.scriptsDirectory + Global.tmpUserInput, "RB " + tmpKeyStringArray[i] + Environment.NewLine);
+                                }
+                            }
+                        }
+                        if (tmpChangesFlag)
+                        {
+                            Console.SetCursorPosition(0, Global.windowH - 3);
+                            GUI.DrawLowerBarSpacer();
+                            WRT.WR(" ▬ ", "Cyan", "Black");
+                            WRT.WR("Recording status is [", "White", "Black");
+                            WRT.WR("ON", "Green", "Black");
+                            WRT.WR("]", "White", "Black");
+                            WRT.WR(" | Total events registered: [", "White", "Black");
+                            WRT.WR(tmpTotalKeystrokes.ToString(), "Cyan", "Black");
+                            WRT.WRLine("]", "White", "Black");
+                            if (Global.genDelayStackCounter > 0)
+                            {
+                                if ((tmpTotalKeystrokes % Global.genDelayStackCounter) == 0) // Insert Sync Resets
+                                {
+                                    tmpOutString = "SR";
+                                    File.AppendAllText(Global.scriptsDirectory + Global.tmpUserInput, tmpOutString + Environment.NewLine);
+                                }
+                            }
+                        }
+                    } // Active Generation While End
+                    GUI.DrawGenEndFile();
+                }
+                if ((Global.tmpUserInput == "2") || (Global.tmpUserInput.ToLower() == "e"))
+                {
+                    Global.KASScriptGenerateMode = false;
+                    Global.tmpUserInput = "NULL";
+                    return;
+                } // Menu end
             } // Active While End
         }
     }
@@ -3809,17 +3921,22 @@ namespace KasTAS
             }
             else if ((Global.tmpUserInput == "3") || (Global.tmpUserInput.ToLower() == "r"))
             {
-                Global.KSOAutoScriptReadMode = true;
+                Global.KASScriptReadMode = true;
                 EXF.ReadKAS();
             }
             else if ((Global.tmpUserInput == "4") || (Global.tmpUserInput.ToLower() == "e"))
             {
-                Global.KSOAutoScriptExecuteMode = true;
+                Global.KASScriptExecuteMode = true;
                 EXF.ExecuteKAS();
             }
-            else if ((Global.tmpUserInput == "5") || (Global.tmpUserInput.ToLower() == "m"))
+            else if ((Global.tmpUserInput == "5") || (Global.tmpUserInput.ToLower() == "g"))
             {
-                Global.SysConfig = true;
+                Global.KASScriptGenerateMode = true;
+                EXF.GenerateKAS();
+            }
+            else if ((Global.tmpUserInput == "6") || (Global.tmpUserInput.ToLower() == "m"))
+            {
+                Global.sysConfig = true;
                 EXF.ChangeTarget();
             }
             EXF.AltInput(Global.tmpUserInput);

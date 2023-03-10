@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net7.0-windows10.0.22621.0</TargetFramework>
+    <RootNamespace>KasTAS</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>True</UseWindowsForms>
+    <StartupObject></StartupObject>
+    <DebugType>full</DebugType>
+    <PackageId>KasTAS</PackageId>
+    <Version>2.0.84</Version>
+    <Authors>Owain#3593</Authors>
+    <Product>KasTAS</Product>
+    <Description>Tool for execute user defined keyboard macro scripts.</Description>
+    <SignAssembly>False</SignAssembly>
+    <Copyright>CC BY-NC-SA International 4.0</Copyright>
+    <AssemblyVersion>1.0.98.1</AssemblyVersion>
+    <FileVersion>2.0.84.0</FileVersion>
+    <PlatformTarget>x64</PlatformTarget>
+    <AssemblyName>KasTAS 2.0.84</AssemblyName>
+    <ApplicationIcon>ALTICON.ICO</ApplicationIcon>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="ALTICON.ICO" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WinFormsComInterop" Version="0.3.2" />
+  </ItemGroup>
+
+</Project>
