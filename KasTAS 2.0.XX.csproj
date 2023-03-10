@@ -1,13 +1,17 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+<<<<<<< HEAD:KasTAS 2.0.XX.csproj
     <TargetFramework>net7.0-windows10.0.22621.0</TargetFramework>
+=======
+    <TargetFramework>net6.0-windows</TargetFramework>
+	<UseWindowsForms>true</UseWindowsForms>
+>>>>>>> 284f469a2f7e48bcfbe348496e0fa7378c50d685:KasTAS 1.0.XX.csproj
     <RootNamespace>KasTAS</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <UseWindowsForms>True</UseWindowsForms>
-    <StartupObject></StartupObject>
+    <StartupObject>KasTAS.Program</StartupObject>
     <DebugType>full</DebugType>
     <PackageId>KasTAS</PackageId>
     <Version>2.0.84</Version>
@@ -17,9 +21,15 @@
     <SignAssembly>False</SignAssembly>
     <Copyright>CC BY-NC-SA International 4.0</Copyright>
     <AssemblyVersion>1.0.98.1</AssemblyVersion>
+<<<<<<< HEAD:KasTAS 2.0.XX.csproj
     <FileVersion>2.0.84.0</FileVersion>
     <PlatformTarget>x64</PlatformTarget>
     <AssemblyName>KasTAS 2.0.84</AssemblyName>
+=======
+    <FileVersion>1.0.98.1</FileVersion>
+    <PlatformTarget>x86</PlatformTarget>
+    <AssemblyName>KasTAS 1.0.98</AssemblyName>
+>>>>>>> 284f469a2f7e48bcfbe348496e0fa7378c50d685:KasTAS 1.0.XX.csproj
     <ApplicationIcon>ALTICON.ICO</ApplicationIcon>
     <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
   </PropertyGroup>
@@ -37,6 +47,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="kascfg.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="keydata.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
