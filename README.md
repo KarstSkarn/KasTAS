@@ -14,7 +14,7 @@
 
 **KasTAS 1.0.98 Demo Video (YouTube)** Click the image below.
 
-[![Demo Video](https://img.youtube.com/vi/HU0dI5LJBi0/0.jpg)](https://www.youtube.com/watch?v=HU0dI5LJBi0)
+[![Demo Video](https://img.youtube.com/vi/9ByNBIrhrlE/0.jpg)](https://www.youtube.com/watch?v=9ByNBIrhrlE)
 
 ##### 2.0.84 Version Features
 
