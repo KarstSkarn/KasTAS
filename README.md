@@ -10,7 +10,7 @@
 
 **KasTAS 2.0.84 Demo Video (YouTube)** Click the image below.
 
-[![Demo Video](https://img.youtube.com/vi/AIu-sCiuhHQ/3.jpg)](https://www.youtube.com/watch?v=AIu-sCiuhHQ
+[![Demo Video](https://img.youtube.com/vi/AIu-sCiuhHQ/3.jpg)](https://www.youtube.com/watch?v=AIu-sCiuhHQ)
 
 **KasTAS 1.0.98 Demo Video (YouTube)** Click the image below.
 
